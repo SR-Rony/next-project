@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -20,7 +21,12 @@ export default function Footer(): JSX.Element {
     { href: "/terms", label: "Terms & Conditions" },
   ]
 
-  const socialIcons: React.ElementType[] = [Facebook, Twitter, Instagram]
+  // Fix: Specify icons as functional components (JSX.Element type)
+  const socialIcons: { icon: JSX.Element; href: string }[] = [
+    { icon: <Facebook size={20} />, href: "#" },
+    { icon: <Twitter size={20} />, href: "#" },
+    { icon: <Instagram size={20} />, href: "#" },
+  ]
 
   return (
     <footer className="bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300 mt-16">
@@ -92,13 +98,13 @@ export default function Footer(): JSX.Element {
               <Button variant="default">Subscribe</Button>
             </form>
             <div className="flex gap-4 mt-6 text-gray-500 dark:text-gray-400">
-              {socialIcons.map((Icon, index) => (
+              {socialIcons.map(({ icon, href }, index) => (
                 <Link
                   key={index}
-                  href="#"
+                  href={href}
                   className="hover:text-primary transition-colors duration-200"
                 >
-                  <Icon size={20} />
+                  {icon}
                 </Link>
               ))}
             </div>
