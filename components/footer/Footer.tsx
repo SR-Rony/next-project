@@ -6,23 +6,22 @@ import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export default function Footer(): JSX.Element {
-  const quickLinks: { href: string; label: string }[] = [
+export default function Footer() {
+  const quickLinks = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ]
 
-  const customerLinks: { href: string; label: string }[] = [
+  const customerLinks = [
     { href: "/faq", label: "FAQ" },
     { href: "/returns", label: "Returns" },
     { href: "/shipping", label: "Shipping Info" },
     { href: "/terms", label: "Terms & Conditions" },
   ]
 
-  // Fix: Specify icons as functional components (JSX.Element type)
-  const socialIcons: { icon: JSX.Element; href: string }[] = [
+  const socialIcons = [
     { icon: <Facebook size={20} />, href: "#" },
     { icon: <Twitter size={20} />, href: "#" },
     { icon: <Instagram size={20} />, href: "#" },
@@ -113,7 +112,8 @@ export default function Footer(): JSX.Element {
 
         {/* Bottom Footer */}
         <div className="mt-16 border-t pt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          &copy; {new Date().getFullYear()} <span className="text-primary font-semibold">Azpero</span>. All rights reserved.
+          &copy; {new Date().getFullYear()}{" "}
+          <span className="text-primary font-semibold">Azpero</span>. All rights reserved.
         </div>
       </div>
     </footer>
