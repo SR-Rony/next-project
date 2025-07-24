@@ -42,10 +42,6 @@ export default function Banner() {
     setCurrent((prev) => (prev + 1) % banners.length)
   }
 
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + banners.length) % banners.length)
-  }
-
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000)
     return () => clearInterval(timer)
@@ -76,20 +72,6 @@ export default function Banner() {
             </div>
           </div>
         ))}
-
-        {/* Arrows */}
-        {/* <button
-          onClick={prevSlide}
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/70 rounded-full p-2"
-        >
-          <ChevronLeft className="text-black" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/70 rounded-full p-2"
-        >
-          <ChevronRight className="text-black" />
-        </button> */}
       </div>
     </div>
   )

@@ -120,6 +120,18 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            href='/shop'
+            className="hover:text-hover_color transition font-medium"
+          >
+            Shop
+          </Link>
+          <Link
+            href='/services'
+            className="hover:text-hover_color transition font-medium"
+          >
+            Services
+          </Link>
+          <Link
             href='/about'
             className="hover:text-hover_color transition font-medium"
           >
@@ -130,12 +142,6 @@ export default function Navbar() {
             className="hover:text-hover_color transition font-medium"
           >
             Contact
-          </Link>
-          <Link
-            href='/services'
-            className="hover:text-hover_color transition font-medium"
-          >
-            Services
           </Link>
       </div>
     </header>
