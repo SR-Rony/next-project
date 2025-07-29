@@ -1,12 +1,15 @@
 "use client"
 
-import React from "react"
+
 import Link from "next/link"
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 export default function Footer() {
+
+
+
   const quickLinks = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop" },
@@ -112,7 +115,6 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="mt-16 border-t pt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          &copy; {new Date().getFullYear()}{" "}
           <span className="text-primary font-semibold">Azpero</span>. All rights reserved.
         </div>
       </div>

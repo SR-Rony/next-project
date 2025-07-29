@@ -18,7 +18,7 @@ type CartItem = {
 }
 
 export default function CartPage(){
-  const [cartItems, setCartItems] = useState<CartItem[]>([
+  const [cartItems, _] = useState([
     {
       id: 1,
       name: "Wireless Headphones",
@@ -34,6 +34,7 @@ export default function CartPage(){
       quantity: 2,
     },
   ])
+ 
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
 

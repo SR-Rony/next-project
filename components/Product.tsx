@@ -1,3 +1,5 @@
+"use client";
+
 import Img1 from "@/public/category/shose.png"
 import Img2 from "@/public/category/category.jpg"
 import Img3 from "@/public/product/headphon.jpg"
