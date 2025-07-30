@@ -1,6 +1,7 @@
 export type UserType = {
-  id: string
+  _id: string 
   name: string | null
   email: string
-  phone?: string  // ← Add this line
+  phone: string  // ← Add this line
+  password: string  // ← Add this line
 }

@@ -32,37 +32,43 @@ export default function RegisterPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+  e.preventDefault()
+  setError("")
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      return
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match")
+    return
+  }
+
+  try {
+    const res = await fetch("http://localhost:4000/api/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.message || "Registration failed")
     }
 
-    try {
-      const res = await fetch("http://localhost:4000/api/user/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+    // ✅ Show alert before redirect
+    alert("Registration successful! Please check your email to verify your account.")
+    
+    // Or optionally use a toast/notification library
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message || "Registration failed")
-      }
-
-      router.push("/login")
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("An unknown error occurred")
-      }
+    router.push("/login")
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      setError(err.message)
+    } else {
+      setError("An unknown error occurred")
     }
   }
+}
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#1f2937] to-[#111827] px-4">

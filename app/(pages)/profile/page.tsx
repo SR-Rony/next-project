@@ -1,6 +1,6 @@
 "use client"
 
-import { logout } from "@/app/redux/features/authSlice"
+import { logout, setUser } from "@/app/redux/features/authSlice"
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook/hook"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -14,11 +14,13 @@ export default function ProfilePage() {
   const dispatch = useAppDispatch()
   // const user = useAppSelector((state) => state.user.user)
   const user: UserType | null = useAppSelector((state) => state.user.user)
+  // console.log(user._id);
+  
   
 
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(user?.name || "")
-  const [email, setEmail] = useState(user?.email || "")
+  const [password, setPassword] = useState(user?.password || "")
   const [phone, setPhone] = useState(user?.phone || "")
 
   if (!user) {
@@ -32,22 +34,47 @@ export default function ProfilePage() {
       router.push("/login")
     }
   }
+// user profile update function
+ const handleSave = async () => {
+  if (!user?._id) return console.error("User ID is missing")
 
-  const handleSave = () => {
-    // You can dispatch an update action here (updateUser({ name, email, phone }))
-    console.log("Updated:", { name, email, phone })
+  try {
+    const res = await fetch(`http://localhost:4000/api/user/update/${user._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, phone, password }),
+      credentials: "include",
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to update profile")
+    }
+
+    console.log("Updated:", data)
+
+    // If successful, update Redux user state if needed
+    dispatch(setUser(data.payload.user))
+
     setOpen(false)
+  } catch (error: any) {
+    console.error("Profile update failed:", error.message || error)
   }
+}
+
 
   return (
     <div className="mt-20">
       <div className="container mx-auto p-4 text-center">
         <h1 className="text-2xl font-bold mb-4">Profile</h1>
         <div className="bg-white text-black p-6 rounded-lg shadow-md space-y-2">
-          <p><strong>ID:</strong> {user.id}</p>
           <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Password:</strong></p>
 
           <div className="flex gap-4 mt-6 justify-center">
             <Dialog open={open} onOpenChange={setOpen}>
@@ -66,16 +93,22 @@ export default function ProfilePage() {
                     onChange={(e) => setName(e.target.value)}
                   />
                   <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <Input
                     type="text"
                     placeholder="Phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={user?.email}
+                    disabled
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

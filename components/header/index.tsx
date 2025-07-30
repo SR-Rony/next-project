@@ -31,6 +31,8 @@ export default function Header() {
   const cart = useAppSelector((state) => state.cart || []) // ✅ safer access
   const user: UserType | null = useAppSelector((state) => state.user.user) // ✅ safer access
   console.log("user data",user);
+
+  const userNmae = user?.name?.slice(0, 2).toUpperCase() || "Guest"
   
 
   // Sync localStorage cart to Redux on client side
@@ -94,7 +96,7 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer">
                       <User className="w-6 h-6" />
-                      <span className="text-md">{user?.name || "Guest"}</span>
+                      <span className="text-md">{userNmae || "Guest"}</span>
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
@@ -133,7 +135,7 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer">
                       <User className="w-6 h-6" />
-                      <span className="text-md">{user?.name || "Guest"}</span>
+                      <span className="text-md">{userNmae || "Guest"}</span>
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
