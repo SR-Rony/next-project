@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import {
   Card,
   CardContent,
@@ -55,12 +56,12 @@ export default function RegisterPage() {
       throw new Error(data.message || "Registration failed")
     }
 
-    // ✅ Show alert before redirect
-    alert("Registration successful! Please check your email to verify your account.")
-    
-    // Or optionally use a toast/notification library
+    toast.success("Registration successful! Check your email to verify.");
 
-    router.push("/login")
+  // ✅ Delay redirect so toast is visible
+  setTimeout(() => {
+    router.push("/verify"); // redirect to /verify/email-sent
+  }, 1500);
   } catch (err: unknown) {
     if (err instanceof Error) {
       setError(err.message)

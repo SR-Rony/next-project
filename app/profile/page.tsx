@@ -60,8 +60,8 @@ export default function ProfilePage() {
     dispatch(setUser(data.payload.user))
 
     setOpen(false)
-  } catch (error: any) {
-    console.error("Profile update failed:", error.message || error)
+  } catch (error) {
+    console.error("Profile update failed:", error)
   }
 }
 

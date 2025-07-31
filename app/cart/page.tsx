@@ -6,34 +6,33 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Link from "next/link"
 import { X } from "lucide-react"
-import { useState } from "react"
 import cartImg from "@/public/category/category.jpg"
 
-type CartItem = {
-  id: number
-  name: string
-  price: number
-  image: object | string // ✅ Fix for Next.js images
-  quantity: number
-}
+// type CartItem = {
+//   id: number
+//   name: string
+//   price: number
+//   image: object | string // ✅ Fix for Next.js images
+//   quantity: number
+// }
 
 export default function CartPage(){
-  const [cartItems, _] = useState([
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      price: 120,
-      image: cartImg,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      price: 80,
-      image: cartImg,
-      quantity: 2,
-    },
-  ])
+ const cartItems =[
+  {
+    id: 1,
+    name: "Wireless Headphones",
+    price: 120,
+    image: cartImg,
+    quantity: 1,
+  },
+  {
+    id: 2,
+    name: "Smart Watch",
+    price: 80,
+    image: cartImg,
+    quantity: 2,
+  },
+]
  
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
