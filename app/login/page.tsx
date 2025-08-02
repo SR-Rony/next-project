@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { setUser } from "@/app/redux/features/authSlice"
-import { useAppDispatch, } from "../../redux/hook/hook"
+import { useAppDispatch, } from "../redux/hook/hook"
 
 export default function LoginPage() {
   const router = useRouter()

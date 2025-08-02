@@ -1,6 +1,7 @@
-
 import { CheckCircle, XCircle } from "lucide-react";
+import Link from "next/link";
 
+// Helper function to call backend
 async function verifyToken(token: string) {
   try {
     const res = await fetch("http://localhost:4000/api/user/verify", {
@@ -9,50 +10,42 @@ async function verifyToken(token: string) {
       cache: "no-store",
       body: JSON.stringify({ token }),
     });
-
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      return {
-        status: "error",
-        message: errorData.message || "Token verification failed",
-      };
-    }
-
-    const data = await res.json();
-    return {
-      status: "success",
-      message: "Email verified successfully!",
-      ...data,
-    };
-  } catch {
-    return {
-      status: "error",
-      message: "Unexpected error during verification",
-    };
+    return await res.json();
+  } catch (error) {
+    console.error("Verification error:", error);
+    return { success: false, message: "Something went wrong" };
   }
 }
 
+// ✅ Await the `params` using a function that accepts a `params` Promise
 export default async function VerifyTokenPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  const result = await verifyToken(params.token);
+  const { token } = await params; // ✅ Await here
+  const result = await verifyToken(token);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md text-center space-y-4">
-        {result.status === "success" ? (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md text-center">
+        {result.success ? (
           <>
             <CheckCircle className="text-green-500 w-16 h-16 mx-auto" />
-            <h2 className="text-2xl font-bold">Email Verified!</h2>
-            <p className="text-gray-600">{result.message}</p>
+            <h2 className="text-2xl font-bold mt-4">Email Verified!</h2>
+            <p className="mt-2">{result.message}</p>
+            <Link href="/login" className="text-blue-600 underline mt-4 block">
+              Go to Login
+            </Link>
           </>
         ) : (
           <>
             <XCircle className="text-red-500 w-16 h-16 mx-auto" />
-            <h2 className="text-2xl font-bold">Verification Failed</h2>
-            <p className="text-gray-600">{result.message}</p>
+            <h2 className="text-2xl font-bold mt-4">Verification Failed</h2>
+            <p className="mt-2">{result.message}</p>
+            <Link href="/register" className="text-blue-600 underline mt-4 block">
+              Try Again
+            </Link>
           </>
         )}
       </div>

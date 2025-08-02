@@ -1,18 +1,17 @@
-// app/(pages)/verify/page.tsx
 import Link from "next/link";
-import { CheckCircle } from "lucide-react";
+import { MailCheck } from "lucide-react";
 
-export default function VerificationSentPage() {
+export default function Verify() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md text-center space-y-4">
-        <CheckCircle className="text-green-500 w-16 h-16 mx-auto" />
-        <h2 className="text-2xl font-bold">Verification Email Sent!</h2>
+      <div className="max-w-md bg-white p-6 rounded-xl shadow-lg text-center space-y-4">
+        <MailCheck className="mx-auto text-green-500" size={48} />
+        <h1 className="text-2xl font-semibold">Verify Your Email</h1>
         <p className="text-gray-600">
-          Please check your email and click the verification link to activate your account.
+          We’ve sent a verification link to your email. Please check your inbox and click the link to activate your account.
         </p>
-        <Link href="/login" className="text-blue-500 hover:underline">
-          Go to Login
+        <Link href="/login">
+          <p className="text-blue-600 hover:underline">Back to Login</p>
         </Link>
       </div>
     </div>
