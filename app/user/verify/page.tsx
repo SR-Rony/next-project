@@ -10,8 +10,8 @@ export default function Verify() {
         <p className="text-gray-600">
           We’ve sent a verification link to your email. Please check your inbox and click the link to activate your account.
         </p>
-        <Link href="/login">
-          <p className="text-blue-600 hover:underline">Back to Login</p>
+        <Link href="user/login">
+          <p className="text-primary hover:underline">Back to Login</p>
         </Link>
       </div>
     </div>

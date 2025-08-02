@@ -7,64 +7,57 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { UserType } from "@/types/user"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function ProfilePage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  // const user = useAppSelector((state) => state.user.user)
   const user: UserType | null = useAppSelector((state) => state.user.user)
-  // console.log(user._id);
-  
-  
 
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(user?.name || "")
-  const [password, setPassword] = useState(user?.password || "")
   const [phone, setPhone] = useState(user?.phone || "")
 
-  if (!user) {
-    router.push("/login")
-    return null
-  }
+  // Redirect only on client side
+  useEffect(() => {
+    if (!user) {
+      router.push("/login")
+    }
+  }, [user, router])
+
+  if (!user) return null
 
   const handleLogout = () => {
     if (confirm("Are you sure you want to logout?")) {
       dispatch(logout())
-      router.push("/login")
+      router.push("/user/login")
     }
   }
-// user profile update function
- const handleSave = async () => {
-  if (!user?._id) return console.error("User ID is missing")
+  
 
-  try {
-    const res = await fetch(`http://localhost:4000/api/user/update/${user._id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, phone, password }),
-      credentials: "include",
-    })
+  const handleSave = async () => {
+    if (!user?._id) return console.error("User ID is missing")
+      
+    try {
+      const res = await fetch(`http://localhost:4000/api/user/update/${user._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone }),
+        credentials: "include",
+      })
 
-    const data = await res.json()
+      const data = await res.json()
+      console.log("Profile update response:", data);
+      
 
-    if (!res.ok) {
-      throw new Error(data?.message || "Failed to update profile")
+      if (!res.ok) throw new Error(data?.message || "Failed to update profile")
+
+      dispatch(setUser(data.payload.user))
+      setOpen(false)
+    } catch (error) {
+      console.error("Profile update failed:", error)
     }
-
-    console.log("Updated:", data)
-
-    // If successful, update Redux user state if needed
-    dispatch(setUser(data.payload.user))
-
-    setOpen(false)
-  } catch (error) {
-    console.error("Profile update failed:", error)
   }
-}
-
 
   return (
     <div className="mt-20">
@@ -74,12 +67,11 @@ export default function ProfilePage() {
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
           <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Password:</strong></p>
 
           <div className="flex gap-4 mt-6 justify-center">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="cursor-pointer" variant="outline">Edit Profile</Button>
+                <Button variant="outline">Edit Profile</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -100,15 +92,8 @@ export default function ProfilePage() {
                   />
                   <Input
                     type="email"
-                    placeholder="Email"
-                    value={user?.email}
+                    value={user.email}
                     disabled
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -118,7 +103,7 @@ export default function ProfilePage() {
               </DialogContent>
             </Dialog>
 
-            <Button className="cursor-pointer" onClick={handleLogout} variant="destructive">
+            <Button onClick={handleLogout} variant="destructive">
               Logout
             </Button>
           </div>

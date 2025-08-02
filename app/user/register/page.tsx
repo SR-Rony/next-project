@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -27,6 +28,8 @@ export default function RegisterPage() {
   })
 
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false) // ✅ Loader state
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })
@@ -35,6 +38,8 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   setError("")
+  setLoading(true) // ✅ Show loader
+
 
   if (formData.password !== formData.confirmPassword) {
     setError("Passwords do not match")
@@ -53,6 +58,7 @@ export default function RegisterPage() {
     const data = await res.json()
 
     if (!res.ok) {
+      setLoading(false) // ✅ Hide loader
       throw new Error(data.message || "Registration failed")
     }
 
@@ -60,9 +66,11 @@ export default function RegisterPage() {
 
   // ✅ Delay redirect so toast is visible
   setTimeout(() => {
-    router.push("/verify"); // redirect to /verify/email-sent
-  }, 1500);
+    router.push("user/verify"); // redirect to /verify/email-sent
+  }, 500);
   } catch (err: unknown) {
+    setLoading(false) // ✅ Show loader
+
     if (err instanceof Error) {
       setError(err.message)
     } else {
@@ -104,8 +112,15 @@ export default function RegisterPage() {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <Button type="submit" className="w-full mt-2 cursor-pointer">
-              Sign Up
+            <Button type="submit" className="w-full mt-2 cursor-pointer" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Sing Up"
+              )}
             </Button>
           </form>
         </CardContent>
@@ -116,7 +131,7 @@ export default function RegisterPage() {
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary underline underline-offset-4">
+            <Link href="login" className="text-primary underline underline-offset-4">
               Log in
             </Link>
           </p>

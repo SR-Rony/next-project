@@ -1,6 +1,6 @@
 "use client"
 
-import {useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { setUser } from "@/app/redux/features/authSlice"
-import { useAppDispatch, } from "../redux/hook/hook"
+import { useAppDispatch } from "../../redux/hook/hook"
+import { Loader2 } from "lucide-react" // spinner icon
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,13 +25,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-
-
-
+  const [loading, setLoading] = useState(false) // ✅ Loader state
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setLoading(true) // ✅ Show loader
 
     try {
       const res = await fetch("http://localhost:4000/api/auth/login", {
@@ -42,21 +42,23 @@ export default function LoginPage() {
       })
 
       const data = await res.json()
-      console.log("Login response:", data);
-      
 
       if (!res.ok) {
         throw new Error(data.message || "Login failed")
       }
 
-      dispatch(setUser(data.payload.user)) // ✅ dispatch user data
-      router.push("/")
+      dispatch(setUser(data.payload.user)) // ✅ Save user in Redux
+      setTimeout(() => {
+        router.push("/"); // redirect to /verify/email-sent
+      }, 500);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
       } else {
         setError("An unknown error occurred")
       }
+    } finally {
+      setLoading(false) // ✅ Hide loader
     }
   }
 
@@ -84,7 +86,7 @@ export default function LoginPage() {
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-sm text-primary hover:underline">
+                <Link href="forgot-password" className="text-sm text-primary hover:underline">
                   Forgot?
                 </Link>
               </div>
@@ -99,8 +101,15 @@ export default function LoginPage() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full mt-2 cursor-pointer">
-              Login
+            <Button type="submit" className="w-full mt-2 cursor-pointer" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
           </form>
         </CardContent>
@@ -111,7 +120,7 @@ export default function LoginPage() {
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             Don’t have an account?{" "}
-            <Link href="/register" className="text-primary underline underline-offset-4">
+            <Link href="register" className="text-primary underline underline-offset-4">
               Sign up
             </Link>
           </p>
