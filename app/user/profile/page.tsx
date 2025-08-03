@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { UserType } from "@/types/user"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -47,10 +48,14 @@ export default function ProfilePage() {
       })
 
       const data = await res.json()
-      console.log("Profile update response:", data);
       
 
-      if (!res.ok) throw new Error(data?.message || "Failed to update profile")
+      if (!res.ok) {
+        toast.error(data.message || "Profile update failed")
+        return  
+      }else{
+        toast.success("Profile updated successfully!")
+      }
 
       dispatch(setUser(data.payload.user))
       setOpen(false)

@@ -6,6 +6,7 @@ import "@/app/globals.css"
 import Footer from "@/components/footer/Footer"
 import Header from "@/components/header"
 import { Providers } from "./redux/provider"
+import { Toaster } from "sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+          <Toaster richColors position="top-right" />
         </Providers>
       </body>
     </html>

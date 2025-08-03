@@ -34,7 +34,7 @@ export default async function VerifyTokenPage({
             <CheckCircle className="text-green-500 w-16 h-16 mx-auto" />
             <h2 className="text-2xl font-bold mt-4">Email Verified!</h2>
             <p className="mt-2">{result.message}</p>
-            <Link href="user/login" className="text-primary underline mt-4 block">
+            <Link href="/user/login" className="text-primary underline mt-4 block">
               Go to Login
             </Link>
           </>
@@ -43,7 +43,7 @@ export default async function VerifyTokenPage({
             <XCircle className="text-red-500 w-16 h-16 mx-auto" />
             <h2 className="text-2xl font-bold mt-4">Verification Failed</h2>
             <p className="mt-2">{result.message}</p>
-            <Link href="user/register" className="text-primary underline mt-4 block">
+            <Link href="/user/register" className="text-primary underline mt-4 block">
               Try Again
             </Link>
           </>

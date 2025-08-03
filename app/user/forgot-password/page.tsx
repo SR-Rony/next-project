@@ -15,16 +15,15 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/user/forgot-password", {
+      const res = await fetch("http://localhost:4000/api/user/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-
-      if (res.ok) {
-        toast.success("Password reset link sent to your email!");
-      } else {
+      if (!res.ok) {
         toast.error("Something went wrong.");
+      } else {
+        toast.success("Password reset link sent to your email!");
       }
     } catch (error) {
       console.error("Error sending reset link:", error);

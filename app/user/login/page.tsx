@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label"
 import { setUser } from "@/app/redux/features/authSlice"
 import { useAppDispatch } from "../../redux/hook/hook"
 import { Loader2 } from "lucide-react" // spinner icon
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -45,6 +46,8 @@ export default function LoginPage() {
 
       if (!res.ok) {
         throw new Error(data.message || "Login failed")
+      }else{
+        toast.success("Login successful!") // ✅ Show success toast
       }
 
       dispatch(setUser(data.payload.user)) // ✅ Save user in Redux

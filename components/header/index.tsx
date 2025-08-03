@@ -30,7 +30,6 @@ export default function Header() {
   const hasMounted = useHasMounted()
   const cart = useAppSelector((state) => state.cart || []) // ✅ safer access
   const user: UserType | null = useAppSelector((state) => state.user.user) // ✅ safer access
-  console.log("user data",user);
 
   const userNmae = user?.name?.slice(0, 2).toUpperCase() || "Guest"
   
@@ -47,7 +46,7 @@ export default function Header() {
   const handleLogout = () => {
     if (confirm("Are you sure you want to logout?")) {
       dispatch(logout())
-      router.push("user/login")
+      router.push("/user/login")
     }
   }
 
@@ -88,7 +87,7 @@ export default function Header() {
             <div className="flex items-center gap-4 md:hidden">
               {!user ? 
 
-                (<Link href="user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
+                (<Link href="/user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
                   <User className="w-6 h-6" />
                 </Link>)
 
@@ -101,7 +100,7 @@ export default function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem>
-                      <Link className="w-full cursor-pointer" href="user/profile">Profile</Link>
+                      <Link className="w-full cursor-pointer" href="/user/profile">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <button onClick={handleLogout} className="w-full text-left">Logout</button>
@@ -127,7 +126,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-4">
             {!user ? 
 
-                (<Link href="user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
+                (<Link href="/user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
                   <User className="w-6 h-6" />
                 </Link>)
 

@@ -42,6 +42,7 @@ export default function RegisterPage() {
 
 
   if (formData.password !== formData.confirmPassword) {
+    setLoading(false) // ✅ Show loader
     setError("Passwords do not match")
     return
   }
@@ -62,11 +63,11 @@ export default function RegisterPage() {
       throw new Error(data.message || "Registration failed")
     }
 
+    
+    // ✅ Delay redirect so toast is visible
+    setTimeout(() => {
     toast.success("Registration successful! Check your email to verify.");
-
-  // ✅ Delay redirect so toast is visible
-  setTimeout(() => {
-    router.push("user/verify"); // redirect to /verify/email-sent
+    router.push("/user/verify"); // redirect to /verify/email-sent
   }, 500);
   } catch (err: unknown) {
     setLoading(false) // ✅ Show loader
