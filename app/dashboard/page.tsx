@@ -6,9 +6,14 @@ import Sidebar from "@/components/dashboard/sidebar";
 import Orders from "@/components/dashboard/order";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserType } from "@/types/user";
+import { useAppSelector } from "../redux/hook/hook";
 
 export default function UserDashboard() {
-  const [user] = useState({
+
+  const user: UserType | null = useAppSelector((state) => state.user.user)
+
+  const [users] = useState({
     name: "SR Rony",
     email: "rony@example.com",
     avatar: "/avatar.png",
@@ -25,26 +30,28 @@ export default function UserDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 pt-16">
       {/* Sidebar for desktop */}
-      <div className="hidden md:block w-64 flex-shrink-0">
+      <div className="hidden md:block w-64 flex-shrink-0 mt-7">
         <Sidebar />
       </div>
 
       {/* Sidebar Drawer for mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 flex">
-          {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          {/* Sidebar Panel */}
-          <div className="relative w-64 bg-white shadow-lg z-50">
+          <div className="relative w-[50%] mt-16">
             <Sidebar />
           </div>
         </div>
       )}
+
+      {/* <div className="relative w-64 bg-white shadow-lg z-50">
+            <Sidebar />
+          </div> */}
 
       {/* Main content */}
       <main className="flex-1 p-4 sm:p-6 space-y-6">
@@ -59,7 +66,7 @@ export default function UserDashboard() {
         <Card className="bg-gradient-to-r from-primary/90 to-purple-500 text-white shadow-md">
           <CardHeader>
             <CardTitle className="text-xl sm:text-2xl font-bold">
-              Welcome back, {user.name} 👋
+              Welcome back, {user ?.name} 👋
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm opacity-90">
@@ -74,7 +81,7 @@ export default function UserDashboard() {
               <CardTitle>Orders</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl sm:text-3xl font-bold text-primary">
-              {user.orders}
+              {`user orders`}
             </CardContent>
           </Card>
           <Card className="hover:shadow-lg transition">
@@ -82,7 +89,7 @@ export default function UserDashboard() {
               <CardTitle>Wishlist</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl sm:text-3xl font-bold text-pink-500">
-              {user.wishlist}
+              {`user.wishlist`}
             </CardContent>
           </Card>
           <Card className="hover:shadow-lg transition">
@@ -90,7 +97,7 @@ export default function UserDashboard() {
               <CardTitle>Addresses</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl sm:text-3xl font-bold text-amber-500">
-              {user.addresses}
+              {`user.addresses`}
             </CardContent>
           </Card>
         </div>

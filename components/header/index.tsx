@@ -31,6 +31,9 @@ export default function Header() {
   const cart = useAppSelector((state) => state.cart || []) // ✅ safer access
   const user: UserType | null = useAppSelector((state) => state.user.user) // ✅ safer access
 
+  // console.log("Header user:", user.isAdmin);
+  
+
   const userNmae = user?.name?.slice(0, 2).toUpperCase() || "Guest"
   
 
@@ -102,6 +105,11 @@ export default function Header() {
                     <DropdownMenuItem>
                       <Link className="w-full cursor-pointer" href="/user/profile">Profile</Link>
                     </DropdownMenuItem>
+                    {user ?.isAdmin && 
+                    <DropdownMenuItem>
+                      <Link className="w-full cursor-pointer" href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    }
                     <DropdownMenuItem asChild>
                       <button onClick={handleLogout} className="w-full text-left">Logout</button>
                     </DropdownMenuItem>
@@ -141,6 +149,11 @@ export default function Header() {
                     <DropdownMenuItem>
                       <Link className="w-full cursor-pointer" href="user/profile">Profile</Link>
                     </DropdownMenuItem>
+                    {user ?.isAdmin && 
+                    <DropdownMenuItem>
+                      <Link className="w-full cursor-pointer" href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    }
                     <DropdownMenuItem asChild>
                       <button onClick={handleLogout} className="w-full text-left">Logout</button>
                     </DropdownMenuItem>
