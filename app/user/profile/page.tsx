@@ -22,7 +22,7 @@ export default function ProfilePage() {
   // Redirect only on client side
   useEffect(() => {
     if (!user) {
-      router.push("/login")
+      router.push("/user/login")
     }
   }, [user, router])
 
