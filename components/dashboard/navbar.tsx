@@ -17,6 +17,7 @@ export default function DashboardNavbar() {
     { name: "Home", href: "/" },
     { name: "Dashboard", href: "/dashboard" },
     { name: "Orders", href: "/dashboard/orders" },
+    { name: "Categorys", href: "/dashboard/categorys" },
     { name: "Products", href: "/dashboard/products" },
     { name: "Customers", href: "/dashboard/customers" },
   ];
@@ -114,7 +115,7 @@ export default function DashboardNavbar() {
                   </span>
                 )}
               </button>
-              <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
+              <Link href="/user/profile" onClick={() => setIsOpen(false)}>
                 <User className="h-5 w-5 text-gray-600" />
               </Link>
             </div>
