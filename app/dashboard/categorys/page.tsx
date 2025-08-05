@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 type CategoryType = {
   _id: string;
@@ -62,24 +63,31 @@ export default function CategoryPage() {
   };
 
   // Delete category
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+ const handleDelete = async (slug: string) => {
+  if (!confirm("Are you sure you want to delete this category?")) return;
 
-    try {
-      const res = await fetch(`http://localhost:4000/api/category/${id}`, {
-        method: "DELETE",
-      });
+  try {
+    const res = await fetch(`http://localhost:4000/api/category/${slug}`, {
+      method: "DELETE",
+    });
 
-      if (!res.ok) {
-        alert("Failed to delete category");
-        return;
-      }
-
-      setCategories((prev) => prev.filter((c) => c._id !== id));
-    } catch (err) {
-      console.error(err);
+    if (!res.ok) {
+      toast.error("Failed to delete category");
+      return;
     }
-  };
+
+    toast.success("Category deleted successfully");
+
+    // Refresh from backend
+    const updatedRes = await fetch("http://localhost:4000/api/category");
+    const data = await updatedRes.json();
+
+    setCategories(data?.payload || []);
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong");
+  }
+};
 
   return (
     <div className="container mx-auto px-4 py-6 mt-16">
@@ -120,7 +128,7 @@ export default function CategoryPage() {
                         <Button
                           variant="destructive"
                           size="icon"
-                          onClick={() => handleDelete(category._id)}
+                          onClick={() => handleDelete(category.slug)}
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
@@ -151,7 +159,7 @@ export default function CategoryPage() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(category._id)}
+                      onClick={() => handleDelete(category.slug)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>

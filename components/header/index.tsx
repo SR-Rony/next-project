@@ -28,14 +28,10 @@ export default function Header() {
   const router = useRouter()
 
   const hasMounted = useHasMounted()
-  const cart = useAppSelector((state) => state.cart || []) // ✅ safer access
-  const user: UserType | null = useAppSelector((state) => state.user.user) // ✅ safer access
+  const cart = useAppSelector((state) => state.cart || [])
+  const user: UserType | null = useAppSelector((state) => state.user.user)
 
-  // console.log("Header user:", user.isAdmin);
-  
-
-  const userNmae = user?.name?.slice(0, 2).toUpperCase() || "Guest"
-  
+  const userName = user?.name?.slice(0, 2).toUpperCase() || "GU"
 
   // Sync localStorage cart to Redux on client side
   useEffect(() => {
@@ -45,7 +41,6 @@ export default function Header() {
     }
   }, [dispatch])
 
-
   const handleLogout = () => {
     if (confirm("Are you sure you want to logout?")) {
       dispatch(logout())
@@ -53,8 +48,54 @@ export default function Header() {
     }
   }
 
+  const renderUserMenu = () =>
+    !user ? (
+      <Link
+        href="/user/login"
+        className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer"
+      >
+        <User className="w-6 h-6" />
+      </Link>
+    ) : (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="flex items-center gap-1 cursor-pointer">
+            <User className="w-6 h-6" />
+            <span className="text-md">{userName}</span>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem>
+            <Link className="w-full cursor-pointer" href="/user/profile">
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          {user?.isAdmin && (
+            <DropdownMenuItem>
+              <Link className="w-full cursor-pointer" href="/dashboard">
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem asChild>
+            <button onClick={handleLogout} className="w-full text-left">
+              Logout
+            </button>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
 
-
+  const renderCartIcon = () => (
+    <Link href="/cart" className="relative p-2 rounded-md hover:bg-white/10 transition">
+      <ShoppingCart className="w-6 h-6" />
+      {hasMounted && cart.length > 0 && (
+        <span className="absolute -top-1 -right-2 text-xs bg-primary text-black rounded-full px-1 font-semibold select-none">
+          {cart.length}
+        </span>
+      )}
+    </Link>
+  )
 
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#131921] via-[#1f2a38] to-[#131921] text-white shadow-md border-b border-gray-800">
@@ -74,7 +115,6 @@ export default function Header() {
                     <Menu className="w-6 h-6" />
                   </Button>
                 </SheetTrigger>
-                {/* site menu add */}
                 <SiteMenu />
               </Sheet>
 
@@ -88,42 +128,8 @@ export default function Header() {
 
             {/* Mobile Icons */}
             <div className="flex items-center gap-4 md:hidden">
-              {!user ? 
-
-                (<Link href="/user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
-                  <User className="w-6 h-6" />
-                </Link>)
-
-                :(<DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer">
-                      <User className="w-6 h-6" />
-                      <span className="text-md">{userNmae || "Guest"}</span>
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem>
-                      <Link className="w-full cursor-pointer" href="/user/profile">Profile</Link>
-                    </DropdownMenuItem>
-                    {user ?.isAdmin && 
-                    <DropdownMenuItem>
-                      <Link className="w-full cursor-pointer" href="/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                    }
-                    <DropdownMenuItem asChild>
-                      <button onClick={handleLogout} className="w-full text-left">Logout</button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>)
-              }
-              <Link href="/cart" className="relative p-2 rounded-md hover:bg-white/10 transition">
-                <ShoppingCart className="w-6 h-6" />
-                {hasMounted && cart.length > 0 && (
-                  <span className="absolute -top-1 -right-2 text-xs bg-primary text-black rounded-full px-1 font-semibold select-none">
-                    {cart.length}
-                  </span>
-                )}
-              </Link>
+              {renderUserMenu()}
+              {renderCartIcon()}
             </div>
           </div>
 
@@ -132,42 +138,8 @@ export default function Header() {
 
           {/* Desktop Icons */}
           <div className="hidden md:flex items-center gap-4">
-            {!user ? 
-
-                (<Link href="/user/login" className="p-2 rounded-md hover:bg-white/10 transition cursor-pointer">
-                  <User className="w-6 h-6" />
-                </Link>)
-
-                :(<DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer">
-                      <User className="w-6 h-6" />
-                      <span className="text-md">{userNmae || "Guest"}</span>
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem>
-                      <Link className="w-full cursor-pointer" href="user/profile">Profile</Link>
-                    </DropdownMenuItem>
-                    {user ?.isAdmin && 
-                    <DropdownMenuItem>
-                      <Link className="w-full cursor-pointer" href="/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                    }
-                    <DropdownMenuItem asChild>
-                      <button onClick={handleLogout} className="w-full text-left">Logout</button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>)
-              }
-            <Link href="/cart" className="relative p-2 rounded-md hover:bg-white/10 transition">
-              <ShoppingCart className="w-6 h-6" />
-              {hasMounted && cart.length > 0 && (
-                <span className="absolute -top-1 -right-2 text-xs bg-primary text-black rounded-full px-1 font-semibold select-none">
-                  {cart.length}
-                </span>
-              )}
-            </Link>
+            {renderUserMenu()}
+            {renderCartIcon()}
           </div>
         </div>
       </div>

@@ -1,52 +1,111 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import Image from "next/image";
+import { toast } from "sonner";
+
+interface Category {
+  _id: string;
+  name: string;
+}
 
 export default function AddProductPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     name: "",
+    description: "",
     price: "",
-    stock: "",
-    image: "",
+    quantity: "",
+    shipping: false,
+    image: null as File | null,
+    categoryId: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/category");
+        const data = await res.json();
+        if (res.ok) {
+          setCategories(data.payload);
+        }
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setForm((prev) => ({ ...prev, image: file }));
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name || !form.price || !form.stock || !form.image) {
-      alert("Please fill in all fields");
+    if (
+      !form.name.trim() ||
+      !form.description.trim() ||
+      !form.price ||
+      Number(form.price) <= 0 ||
+      !form.quantity ||
+      Number(form.quantity) < 0 ||
+      !form.categoryId ||
+      !form.image
+    ) {
+      toast("Please fill in all fields correctly.");
       return;
     }
 
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append("quantity", form.quantity);
+    formData.append("shipping", form.shipping ? "1" : "0");
+    formData.append("categoryId", form.categoryId);
+    formData.append("image", form.image);
+
     setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:5000/api/products", {
+      const res = await fetch("http://localhost:4000/api/product", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          price: Number(form.price),
-          stock: Number(form.stock),
-          image: form.image,
-        }),
+        body: formData,
       });
 
+      const result = await res.json();
+      console.log("Response:", result.payload.success);
+      
+
       if (res.ok) {
+        alert("Product created successfully");
         router.push("/dashboard/products");
       } else {
-        const errorData = await res.json();
-        alert(errorData.message || "Failed to create product");
+        alert(result.message || "Failed to create product");
       }
     } catch (error) {
-      console.error("Error adding product:", error);
+      console.error("Error:", error);
       alert("Something went wrong!");
     } finally {
       setLoading(false);
@@ -58,80 +117,133 @@ export default function AddProductPage() {
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Add New Product</CardTitle>
-          <CardDescription>
-            Fill in the product details below to add it to your store.
-          </CardDescription>
+          <CardDescription>Upload a new product to your store.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Product Name */}
+            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Product Name</Label>
               <Input
                 id="name"
-                placeholder="Enter product name"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, name: e.target.value }))
+                }
+                placeholder="Enter product name"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                value={form.description}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, description: e.target.value }))
+                }
+                placeholder="Enter product description"
+                className="w-full border rounded p-2"
+                rows={4}
+                required
               />
             </div>
 
             {/* Price */}
             <div className="space-y-2">
-              <Label htmlFor="price">Price ($)</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
                 id="price"
                 type="number"
-                placeholder="Enter price"
+                min="0"
+                step="0.01"
                 value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, price: e.target.value }))
+                }
+                placeholder="Enter price"
+                required
               />
             </div>
 
-            {/* Stock */}
+            {/* Quantity */}
             <div className="space-y-2">
-              <Label htmlFor="stock">Stock Quantity</Label>
+              <Label htmlFor="quantity">Quantity</Label>
               <Input
-                id="stock"
+                id="quantity"
                 type="number"
-                placeholder="Enter stock quantity"
-                value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                min="0"
+                value={form.quantity}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, quantity: e.target.value }))
+                }
+                placeholder="Enter quantity"
+                required
               />
             </div>
 
-            {/* Image URL */}
+            {/* Shipping */}
+            <div className="space-y-2 flex items-center gap-2">
+              <input
+                id="shipping"
+                type="checkbox"
+                checked={form.shipping}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, shipping: e.target.checked }))
+                }
+              />
+              <Label htmlFor="shipping" className="mb-0 cursor-pointer">
+                Shipping Available
+              </Label>
+            </div>
+
+            {/* Image Upload */}
             <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
+              <Label htmlFor="image">Product Image</Label>
               <Input
                 id="image"
-                placeholder="Paste product image URL"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                required
               />
-            </div>
-
-            {/* Preview */}
-            {form.image && (
-              <div className="mt-4">
-                <Label>Preview:</Label>
-                {/* <Ima
-                  src={form.image}
-                  alt="Product preview"
-                  className="w-40 h-40 object-cover rounded-lg border mt-2"
-                /> */}
-                <Image 
-                  src={`form.image`}
-                  alt="Product preview"
+              {imagePreview && (
+                <Image
+                  src={imagePreview}
+                  alt="Preview"
                   width={160}
                   height={160}
-                  className="w-40 h-40 object-cover rounded-lg border mt-2"
-                />      
-              </div>
-            )}
+                  className="rounded border mt-2 object-cover w-40 h-40"
+                />
+              )}
+            </div>
 
-            {/* Submit Button */}
+            {/* Category Dropdown */}
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <select
+                id="category"
+                className="w-full border px-3 py-2 rounded"
+                value={form.categoryId}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, categoryId: e.target.value }))
+                }
+                required
+              >
+                <option value="">Select category</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Submit */}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Adding..." : "Add Product"}
+              {loading ? "Submitting..." : "Add Product"}
             </Button>
           </form>
         </CardContent>

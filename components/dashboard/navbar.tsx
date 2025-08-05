@@ -70,7 +70,8 @@ export default function DashboardNavbar() {
               className="flex items-center gap-2 text-gray-700 hover:text-primary"
             >
               <User className="h-5 w-5 text-gray-600" />
-              <span>{user?.name || "Profile"}</span>
+               <p>{user ?.name || "Profile"}</p>
+
             </Link>
           </div>
 

@@ -1,73 +1,49 @@
 "use client"
 
-import Image, { StaticImageData } from "next/image"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import cate from "@/public/category/category.jpg"
-import shose from "@/public/category/shose.png"
-import watch from "@/public/category/watch.jpeg"
-import dress from "@/public/category/dress.jpg"
 
 type Category = {
   name: string
   slug: string
-  image: string | StaticImageData
 }
 
-const categories: Category[] = [
-  {
-    name: "Shoes",
-    slug: "shoes",
-    image: shose,
-  },
-  {
-    name: "Fashion",
-    slug: "fashion",
-    image: cate,
-  },
-  {
-    name: "Watches",
-    slug: "watches",
-    image: watch,
-  },
-  {
-    name: "Furniture",
-    slug: "furniture",
-    image: dress,
-  },
-  {
-    name: "Beauty & Health",
-    slug: "beauty-health",
-    image: shose,
-  },
-]
+export default function Category() {
+  const [categories, setCategories] = useState<Category[]>([])
 
-export default function CategoryGrid(){
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/category")
+        const data = await res.json()
+        setCategories(data.payload)
+      } catch (error) {
+        console.error("Failed to load categories", error)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
   return (
-    <section className="container mx-auto py-12">
+    <section className="container mx-auto py-12 px-4">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-2">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
           Explore Categories
         </h2>
+        <p className="text-gray-500">Browse products by category</p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {categories.map((category) => (
           <Link
             key={category.slug}
             href={`/category/${category.slug}`}
-            className="group relative block rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+            className="group bg-white border border-gray-200 rounded-lg p-4 text-center shadow-sm hover:shadow-md hover:border-primary transition-all duration-200"
           >
-            <Image
-              src={category.image}
-              alt={category.name}
-              width={300}
-              height={300}
-              className="w-full h-40 object-cover transform group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <h3 className="text-white text-lg font-semibold group-hover:scale-110 transition-all duration-200">
-                {category.name}
-              </h3>
-            </div>
+            <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-primary transition-colors">
+              {category.name}
+            </span>
           </Link>
         ))}
       </div>

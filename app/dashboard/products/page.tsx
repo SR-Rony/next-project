@@ -13,7 +13,7 @@ type ProductType = {
   _id: string;
   name: string;
   price: number;
-  stock: number;
+  quantity: number;
   image: string;
 };
 
@@ -22,11 +22,14 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<ProductType[]>([]);
 
+  console.log("Products:", products);
+  
+
   // Fetch products from backend
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch("http://localhost:4000/api/product")
       .then((res) => res.json())
-      .then((data) => setProducts(data))
+      .then((data) => setProducts(data.payload.products))
       .catch((err) => console.error(err));
   }, []);
 
@@ -83,7 +86,7 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell>{product.name}</TableCell>
                     <TableCell>${product.price}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
+                    <TableCell>{product.quantity}</TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
                         variant="outline"
