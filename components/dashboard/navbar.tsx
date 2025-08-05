@@ -4,9 +4,14 @@
 import { useState } from "react";
 import { Menu, X, ShoppingBag, Bell, User } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { UserType } from "@/types/user";
+import { useAppSelector } from "@/app/redux/hook/hook";
 
 export default function DashboardNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const user: UserType | null = useAppSelector((state) => state.user.user);
 
   const menuItems = [
     { name: "Home", href: "/" },
@@ -16,14 +21,17 @@ export default function DashboardNavbar() {
     { name: "Customers", href: "/dashboard/customers" },
   ];
 
+  const notificationCount = 3; // replace with Redux data later
+
   return (
-    <nav className="bg-white border-b shadow-sm fixed w-full z-50  top-0 left-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white border-b shadow-sm fixed w-full z-50 top-0 left-0">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
+          
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg text-primary">
-            <ShoppingBag className="" />
-            Azpero
+            <ShoppingBag />
+            <span className="hidden sm:block">Azpero</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -32,29 +40,43 @@ export default function DashboardNavbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-primary font-medium"
+                className={`font-medium ${
+                  pathname === item.href
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-700 hover:text-primary"
+                }`}
               >
                 {item.name}
               </Link>
             ))}
           </div>
 
-          {/* Icons */}
+          {/* Desktop Icons */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="relative p-2 hover:bg-gray-100 rounded-full">
+            <button
+              aria-label="Notifications"
+              className="relative p-2 hover:bg-gray-100 rounded-full"
+            >
               <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                3
-              </span>
+              {notificationCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                  {notificationCount}
+                </span>
+              )}
             </button>
-            <Link href="/dashboard/profile">
+            <Link
+              href="/user/profile"
+              className="flex items-center gap-2 text-gray-700 hover:text-primary"
+            >
               <User className="h-5 w-5 text-gray-600" />
+              <span>{user?.name || "Profile"}</span>
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle */}
           <div className="md:hidden">
             <button
+              aria-label="Toggle menu"
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
             >
@@ -67,21 +89,32 @@ export default function DashboardNavbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden border-t bg-white">
-          <div className="px-4 py-3 space-y-2">
+          <div className="container mx-auto px-4 py-3 space-y-2">
             {menuItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md"
+                className={`block px-3 py-2 rounded-md ${
+                  pathname === item.href
+                    ? "bg-primary text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setIsOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
+            {/* Mobile Icons */}
             <div className="flex gap-4 mt-3">
-              <button className="p-2 hover:bg-gray-100 rounded-full">
+              <button aria-label="Notifications" className="relative p-2 hover:bg-gray-100 rounded-full">
                 <Bell className="h-5 w-5 text-gray-600" />
+                {notificationCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                    {notificationCount}
+                  </span>
+                )}
               </button>
-              <Link href="/dashboard/profile">
+              <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
                 <User className="h-5 w-5 text-gray-600" />
               </Link>
             </div>
