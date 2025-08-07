@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react";
 import ProductItem from "./ProductItem";
 import { Loader2 } from "lucide-react";
@@ -21,7 +22,7 @@ export default function Product() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/product");
+        const res = await fetch(`${baseUrl}/product`);
         if (!res.ok) throw new Error("Failed to load products");
         const data = await res.json();
         setProducts(data.payload.products); // adjust if your response shape is different

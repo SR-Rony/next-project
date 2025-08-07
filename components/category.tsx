@@ -1,5 +1,6 @@
 "use client"
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react"
 import Link from "next/link"
 
@@ -14,7 +15,7 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/category")
+        const res = await fetch(`${baseUrl}/category`)
         const data = await res.json()
         setCategories(data.payload)
       } catch (error) {
