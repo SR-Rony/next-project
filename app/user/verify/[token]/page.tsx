@@ -1,10 +1,11 @@
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 
 // Helper function to call backend
 async function verifyToken(token: string) {
   try {
-    const res = await fetch("http://localhost:4000/api/user/verify", {
+    const res = await fetch(`${baseUrl}/user/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",

@@ -1,5 +1,6 @@
 "use client"
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -48,7 +49,7 @@ export default function RegisterPage() {
   }
 
   try {
-    const res = await fetch("http://localhost:4000/api/user/register", {
+    const res = await fetch(`${baseUrl}/user/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

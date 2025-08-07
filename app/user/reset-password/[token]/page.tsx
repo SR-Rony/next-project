@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +34,7 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:4000/api/user/reset-password`, {
+      const res = await fetch(`${baseUrl}/user/reset-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword }),

@@ -1,5 +1,6 @@
 "use client"
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -34,7 +35,7 @@ export default function LoginPage() {
     setLoading(true) // ✅ Show loader
 
     try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
+      const res = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

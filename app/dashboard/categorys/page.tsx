@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ export default function CategoryPage() {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/category");
+      const res = await fetch(`${baseUrl}/category`);
       const data = await res.json();
       setCategories(data.payload);
     } catch (err) {
@@ -40,7 +41,7 @@ export default function CategoryPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/category", {
+      const res = await fetch(`${baseUrl}/category`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newCategory }),
@@ -67,7 +68,7 @@ export default function CategoryPage() {
   if (!confirm("Are you sure you want to delete this category?")) return;
 
   try {
-    const res = await fetch(`http://localhost:4000/api/category/${slug}`, {
+    const res = await fetch(`${baseUrl}/category/${slug}`, {
       method: "DELETE",
     });
 
@@ -79,7 +80,7 @@ export default function CategoryPage() {
     toast.success("Category deleted successfully");
 
     // Refresh from backend
-    const updatedRes = await fetch("http://localhost:4000/api/category");
+    const updatedRes = await fetch(`${baseUrl}/category`);
     const data = await updatedRes.json();
 
     setCategories(data?.payload || []);

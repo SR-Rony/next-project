@@ -1,5 +1,5 @@
 "use client";
-
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/user/forgot-password", {
+      const res = await fetch(`${baseUrl}/user/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

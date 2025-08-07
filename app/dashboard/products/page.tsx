@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ export default function ProductsPage() {
 
   // Fetch products from backend
   useEffect(() => {
-    fetch("http://localhost:4000/api/product")
+    fetch(`${baseUrl}/product`)
       .then((res) => res.json())
       .then((data) => setProducts(data.payload.products))
       .catch((err) => console.error(err));
@@ -39,7 +40,7 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    await fetch(`http://localhost:4000/api/product/${id}`, { method: "DELETE" });
+    await fetch(`${baseUrl}/product/${id}`, { method: "DELETE" });
     setProducts((prev) => prev.filter((p) => p._id !== id));
   };
 

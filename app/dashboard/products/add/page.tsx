@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ export default function AddProductPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/category");
+        const res = await fetch(`${baseUrl}/category`);
         const data = await res.json();
         if (res.ok) {
           setCategories(data.payload);
@@ -89,7 +90,7 @@ export default function AddProductPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/product", {
+      const res = await fetch(`${baseUrl}/product`, {
         method: "POST",
         body: formData,
       });

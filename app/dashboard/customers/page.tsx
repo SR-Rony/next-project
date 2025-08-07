@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ export default function CustomersPage() {
   // Fetch customers from backend with search
   const fetchCustomers = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/user?search=${search}`);
+      const res = await fetch(`${baseUrl}/user?search=${search}`);
       const data = await res.json();
       setCustomers(data.payload.allUser || []);
     } catch (err) {
@@ -42,7 +43,7 @@ export default function CustomersPage() {
     if (!confirm("Are you sure you want to delete this customer?")) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/user/${id}`, {
+      const res = await fetch(`${baseUrl}/user/${id}`, {
         method: "DELETE",
       });
 

@@ -1,5 +1,6 @@
 "use client"
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { logout, setUser } from "@/app/redux/features/authSlice"
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook/hook"
 import { Button } from "@/components/ui/button"
@@ -40,7 +41,7 @@ export default function ProfilePage() {
     if (!user?._id) return console.error("User ID is missing")
       
     try {
-      const res = await fetch(`http://localhost:4000/api/user/update/${user._id}`, {
+      const res = await fetch(`${baseUrl}/user/update/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone }),
