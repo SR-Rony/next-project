@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import SiteMenu from "./siteMenu"
-import MenuItem from "./menu"
 import SearchBar from "./searchBar"
 import { useAppSelector } from "@/app/redux/hook/hook"
 import { setCart } from "@/app/redux/features/cartSlice"
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { logout } from "@/app/redux/features/authSlice"
 import { UserType } from "@/types/user"
+import MobileBottomMenu from "./menu"
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -33,7 +33,6 @@ export default function Header() {
 
   const userName = user?.name?.slice(0, 2).toUpperCase() || "GU"
 
-  // Sync localStorage cart to Redux on client side
   useEffect(() => {
     if (typeof window !== "undefined") {
       const cartFromStorage = JSON.parse(localStorage.getItem("cart") || "[]")
@@ -97,13 +96,22 @@ export default function Header() {
     </Link>
   )
 
+  const menuItems = [
+    { name: "Home", href: "/" },
+    { name: "Shop", href: "/shop" },
+    { name: "Services", href: "/services" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
+  ]
+
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#131921] via-[#1f2a38] to-[#131921] text-white shadow-md border-b border-gray-800">
       <div className="container mx-auto py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          {/* Left: Menu + Logo */}
+          {/* Left: Logo + Mobile Menu */}
           <div className="flex items-center justify-between w-full md:w-auto">
             <div className="flex items-center gap-3">
+              {/* Hamburger for mobile */}
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -118,6 +126,7 @@ export default function Header() {
                 <SiteMenu />
               </Sheet>
 
+              {/* Logo */}
               <Link
                 href="/"
                 className="text-2xl font-extrabold text-primary hover:text-primary/80 transition whitespace-nowrap"
@@ -126,17 +135,17 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Mobile Icons */}
+            {/* Icons on small screens */}
             <div className="flex items-center gap-4 md:hidden">
               {renderUserMenu()}
               {renderCartIcon()}
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar (centered) */}
           <SearchBar />
 
-          {/* Desktop Icons */}
+          {/* Icons on desktop */}
           <div className="hidden md:flex items-center gap-4">
             {renderUserMenu()}
             {renderCartIcon()}
@@ -144,7 +153,19 @@ export default function Header() {
         </div>
       </div>
 
-      <MenuItem />
+      {/* Menu Items (Visible on all screen sizes) */}
+      <div className="hidden md:flex justify-center container mx-auto items-center bg-[#232f3e] px-4 py-2 text-sm gap-6 border-t border-gray-700">
+          {menuItems.map((item) => (
+              <Link
+                  key={item.name}
+                  href={item.href}
+                  className="hover:text-hover_color transition font-medium"
+              >
+                  {item.name}
+              </Link>
+          ))}
+      </div>
+      <MobileBottomMenu/>
     </header>
   )
 }
