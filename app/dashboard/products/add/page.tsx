@@ -99,14 +99,14 @@ export default function AddProductPage() {
       
 
       if (res.ok) {
-        alert("Product created successfully");
+        toast.success("Product created successfully");
         router.push("/dashboard/products");
       } else {
-        alert(result.message || "Failed to create product");
+        toast.error(result.message || "Failed to create product");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Something went wrong!");
+      toast.error("Something went wrong!");
     } finally {
       setLoading(false);
     }

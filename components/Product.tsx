@@ -1,47 +1,59 @@
 "use client";
 
-import Img1 from "@/public/category/shose.png"
-import Img2 from "@/public/category/category.jpg"
-import Img3 from "@/public/product/headphon.jpg"
+import { useEffect, useState } from "react";
+import ProductItem from "./ProductItem";
+import { Loader2 } from "lucide-react";
 
-import ProductItem from "./ProductItem"
-
-const products = [
-  {
-    id: 1,
-    name: "Wireless Headphones",
-    slug: "wireless-headphones",
-    price: 99.99,
-    originalPrice: 150,
-    image: Img1,
-  },
-  {
-    id: 2,
-    name: "Smart Watch",
-    slug: "smart-watch",
-    price: 149.99,
-    originalPrice: 300,
-    image: Img2,
-  },
-  {
-    id: 3,
-    name: "Smart Watch",
-    slug: "smart-watch",
-    price: 149.99,
-    originalPrice: 300,
-    image: Img3,
-  },
-]
+interface ProductType {
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+}
 
 export default function Product() {
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/product");
+        if (!res.ok) throw new Error("Failed to load products");
+        const data = await res.json();
+        setProducts(data.payload.products); // adjust if your response shape is different
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    <div className="container mx-auto py-10">
-      <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductItem key={product.id} product={product} />
-        ))}
-      </div>
+    <div className="container mx-auto py-10 px-4">
+      <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">
+        🌟 Featured Products
+      </h2>
+
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        </div>
+      ) : error ? (
+        <p className="text-center text-red-500 font-medium">{error}</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductItem key={product._id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
-  )
+  );
 }

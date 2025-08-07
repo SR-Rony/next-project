@@ -39,7 +39,7 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    await fetch(`http://localhost:5000/api/products/${id}`, { method: "DELETE" });
+    await fetch(`http://localhost:4000/api/product/${id}`, { method: "DELETE" });
     setProducts((prev) => prev.filter((p) => p._id !== id));
   };
 
