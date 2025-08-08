@@ -26,6 +26,9 @@ export default function Category() {
     fetchCategories()
   }, [])
 
+  console.log("backend api",baseUrl);
+  
+
   return (
     <section className="container mx-auto py-12 px-4">
       <div className="text-center mb-8">
