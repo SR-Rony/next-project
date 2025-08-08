@@ -1,5 +1,6 @@
 // app/product/[slug]/page.tsx
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 // ✅ This function gets a product from your API
 async function getProduct(slug: string) {
-  const res = await fetch(`http://localhost:4000/api/product/${slug}`, {
+  const res = await fetch(`${baseUrl}/product/${slug}`, {
     cache: "no-store",
   });
 

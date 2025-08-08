@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useAppSelector, useAppDispatch } from "@/app/redux/hook/hook";
 import { UserType } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -16,7 +17,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await fetch(`http://localhost:4000/api/auth/logout`, {
+      await fetch(`${baseUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

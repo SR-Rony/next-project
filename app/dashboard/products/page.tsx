@@ -114,7 +114,7 @@ export default function ProductsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table>http://localhost:4000/api
         </CardContent>
       </Card>
     </div>

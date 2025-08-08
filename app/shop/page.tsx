@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import Image from "next/image"
 import Link from "next/link"
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 type CategoryType = {
   _id: string

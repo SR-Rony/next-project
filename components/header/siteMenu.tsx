@@ -1,5 +1,6 @@
 "use client";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import Link from "next/link";
 import { SheetContent } from "../ui/sheet";
 import { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ export default function SiteMenu() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/category");
+        const res = await fetch(`${baseUrl}/category`);
         const data = await res.json();
         setCategories(data.payload);
       } catch (error) {
