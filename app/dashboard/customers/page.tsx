@@ -36,7 +36,6 @@ export default function CustomersPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch customers from backend
   const fetchCustomers = async () => {
     try {
       const res = await fetch(`${baseUrl}/user?search=${search}`);
@@ -51,7 +50,6 @@ export default function CustomersPage() {
     fetchCustomers();
   }, [search]);
 
-  // Delete customer
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this customer?")) return;
     try {
@@ -67,21 +65,18 @@ export default function CustomersPage() {
     }
   };
 
-  // View Modal
   const handleView = (customer: CustomerType) => {
     setSelectedCustomer(customer);
     setIsEditMode(false);
     setModalOpen(true);
   };
 
-  // Edit Modal
   const handleEdit = (customer: CustomerType) => {
     setSelectedCustomer(customer);
     setIsEditMode(true);
     setModalOpen(true);
   };
 
-  // Save Changes for isAdmin / isBanned
   const handleSaveChanges = async () => {
     if (!selectedCustomer) return;
     try {
@@ -118,6 +113,7 @@ export default function CustomersPage() {
           />
         </CardHeader>
         <CardContent>
+          {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
@@ -143,7 +139,12 @@ export default function CustomersPage() {
                         <Button variant="outline" size="icon" onClick={() => handleView(customer)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="hover:bg-green-500 hover:text-white" onClick={() => handleEdit(customer)}>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="hover:bg-green-500 hover:text-white"
+                          onClick={() => handleEdit(customer)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="destructive" size="icon" onClick={() => handleDelete(customer._id)}>
@@ -162,12 +163,50 @@ export default function CustomersPage() {
               </TableBody>
             </Table>
           </div>
+
+          {/* Mobile List */}
+          <div className="md:hidden space-y-4">
+            {customers.length > 0 ? (
+              customers.map((customer) => (
+                <Card key={customer._id} className="p-4 shadow-sm border border-gray-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-semibold">{customer.name}</h3>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="icon" onClick={() => handleView(customer)} title="View">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="hover:bg-green-500 hover:text-white"
+                        onClick={() => handleEdit(customer)}
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="destructive" size="icon" onClick={() => handleDelete(customer._id)} title="Delete">
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-700 space-y-1">
+                    <p><strong>Email:</strong> {customer.email}</p>
+                    <p><strong>Phone:</strong> {customer.phone}</p>
+                    <p><strong>Address:</strong> {customer.address}</p>
+                    <p><strong>Orders:</strong> {customer.orders}</p>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 py-6">No customers found.</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md w-full">
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit User Permissions" : "View Customer"}</DialogTitle>
           </DialogHeader>
@@ -225,7 +264,7 @@ export default function CustomersPage() {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Close</Button>
             {isEditMode && (
               <Button onClick={handleSaveChanges}>Save Changes</Button>
