@@ -7,7 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, Edit, Trash } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type CustomerType = {
   _id: string;
@@ -16,14 +25,18 @@ type CustomerType = {
   phone: string;
   address: string;
   orders: number;
+  isAdmin: boolean;
+  isBanned: boolean;
 };
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [customers, setCustomers] = useState<CustomerType[]>([]);
-  const router = useRouter();
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerType | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  // Fetch customers from backend with search
+  // Fetch customers from backend
   const fetchCustomers = async () => {
     try {
       const res = await fetch(`${baseUrl}/user?search=${search}`);
@@ -41,31 +54,55 @@ export default function CustomersPage() {
   // Delete customer
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this customer?")) return;
-
     try {
-      const res = await fetch(`${baseUrl}/user/${id}`, {
-        method: "DELETE",
-      });
-
+      const res = await fetch(`${baseUrl}/user/${id}`, { method: "DELETE" });
       if (!res.ok) {
         alert("Failed to delete customer");
         return;
       }
-
+      toast.success("Customer deleted successfully");
       setCustomers((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Navigate to edit form
-  const handleEdit = (id: string) => {
-    router.push(`/dashboard/customers/edit/${id}`);
+  // View Modal
+  const handleView = (customer: CustomerType) => {
+    setSelectedCustomer(customer);
+    setIsEditMode(false);
+    setModalOpen(true);
   };
 
-  // Navigate to view details
-  const handleView = (id: string) => {
-    router.push(`/dashboard/customers/${id}`);
+  // Edit Modal
+  const handleEdit = (customer: CustomerType) => {
+    setSelectedCustomer(customer);
+    setIsEditMode(true);
+    setModalOpen(true);
+  };
+
+  // Save Changes for isAdmin / isBanned
+  const handleSaveChanges = async () => {
+    if (!selectedCustomer) return;
+    try {
+      const res = await fetch(`${baseUrl}/user/${selectedCustomer._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isAdmin: selectedCustomer.isAdmin,
+          isBanned: selectedCustomer.isBanned,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update customer");
+
+      toast.success("Customer updated successfully");
+      setModalOpen(false);
+      fetchCustomers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating customer");
+    }
   };
 
   return (
@@ -81,53 +118,35 @@ export default function CustomersPage() {
           />
         </CardHeader>
         <CardContent>
-          {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="font-semibold">Name</TableHead>
-                  <TableHead className="font-semibold">Email</TableHead>
-                  <TableHead className="font-semibold">Phone</TableHead>
-                  <TableHead className="font-semibold">Address</TableHead>
-                  <TableHead className="font-semibold">Orders</TableHead>
-                  <TableHead className="text-right font-semibold">Actions</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>Orders</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customers.length > 0 ? (
                   customers.map((customer) => (
-                    <TableRow
-                      key={customer._id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
+                    <TableRow key={customer._id}>
                       <TableCell>{customer.name}</TableCell>
                       <TableCell>{customer.email}</TableCell>
                       <TableCell>{customer.phone}</TableCell>
                       <TableCell>{customer.address}</TableCell>
                       <TableCell>{customer.orders}</TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="hover:bg-primary hover:text-white"
-                          onClick={() => handleView(customer._id)}
-                        >
+                        <Button variant="outline" size="icon" onClick={() => handleView(customer)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="hover:bg-green-500 hover:text-white"
-                          onClick={() => handleEdit(customer._id)}
-                        >
+                        <Button variant="outline" size="icon" className="hover:bg-green-500 hover:text-white" onClick={() => handleEdit(customer)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDelete(customer._id)}
-                        >
+                        <Button variant="destructive" size="icon" onClick={() => handleDelete(customer._id)}>
                           <Trash className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -143,56 +162,77 @@ export default function CustomersPage() {
               </TableBody>
             </Table>
           </div>
-
-          {/* Mobile Card View */}
-          <div className="grid gap-4 md:hidden">
-            {customers.length > 0 ? (
-              customers.map((customer) => (
-                <Card
-                  key={customer._id}
-                  className="p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold text-gray-800">{customer.name}</h3>
-                    <span className="text-sm text-gray-500">{customer.orders} orders</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{customer.email}</p>
-                  <p className="text-sm text-gray-600">{customer.phone}</p>
-                  <p className="text-sm text-gray-600">{customer.address}</p>
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 hover:bg-primary hover:text-white"
-                      onClick={() => handleView(customer._id)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" /> View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 hover:bg-green-500 hover:text-white"
-                      onClick={() => handleEdit(customer._id)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" /> Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleDelete(customer._id)}
-                    >
-                      <Trash className="h-4 w-4 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <p className="text-center text-gray-500">No customers found.</p>
-            )}
-          </div>
         </CardContent>
       </Card>
+
+      {/* Modal */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? "Edit User Permissions" : "View Customer"}</DialogTitle>
+          </DialogHeader>
+
+          {selectedCustomer && (
+            <div className="space-y-3">
+              {isEditMode ? (
+                <>
+                  <div>
+                    <Label>Is Admin</Label>
+                    <Select
+                      value={String(selectedCustomer.isAdmin)}
+                      onValueChange={(value) =>
+                        setSelectedCustomer({ ...selectedCustomer, isAdmin: value === "true" })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">True</SelectItem>
+                        <SelectItem value="false">False</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Is Banned</Label>
+                    <Select
+                      value={String(selectedCustomer.isBanned)}
+                      onValueChange={(value) =>
+                        setSelectedCustomer({ ...selectedCustomer, isBanned: value === "true" })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">True</SelectItem>
+                        <SelectItem value="false">False</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                  <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                  <p><strong>Phone:</strong> {selectedCustomer.phone}</p>
+                  <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                  <p><strong>Orders:</strong> {selectedCustomer.orders}</p>
+                  <p><strong>Is Admin:</strong> {String(selectedCustomer.isAdmin)}</p>
+                  <p><strong>Is Banned:</strong> {String(selectedCustomer.isBanned)}</p>
+                </>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Close</Button>
+            {isEditMode && (
+              <Button onClick={handleSaveChanges}>Save Changes</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
