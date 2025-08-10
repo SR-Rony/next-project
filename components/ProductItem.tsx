@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAppDispatch } from "@/app/redux/hook/hook";
+import { addToCart } from "@/app/redux/features/cartSlice";
 
 interface ProductProps {
   product: {
@@ -17,10 +19,12 @@ interface ProductProps {
     description?: string;
     rating?: number;
     isPopular?: boolean;
+    quantity?: number; // default 1 for cart
   };
 }
 
-export default function ProductItem({ product }: ProductProps) {
+
+export default function ProductItem({ product }: ProductProps){
   const discount =
     product.originalPrice && product.originalPrice > product.price
       ? Math.round(
@@ -28,50 +32,60 @@ export default function ProductItem({ product }: ProductProps) {
         )
       : null;
 
-  const handleAddToCart = () => {
-    // You would replace this with Redux, Context or API call
+  const dispatch = useAppDispatch();
+
+  const handleAddToCart = (): void => {
+    dispatch(
+      addToCart({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        qty: 1,
+        image: product.image, // Add image here, important if your cart slice expects it
+      })
+    );
     toast.success(`🛒 ${product.name} added to cart`);
   };
 
   return (
     <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden border">
-      {/* 🔥 Popular Badge */}
+      {/* Popular Badge */}
       {product.isPopular && (
         <div className="absolute top-2 left-2 bg-yellow-400 text-xs font-semibold px-2 py-1 rounded z-10">
           Popular
         </div>
       )}
 
-      {/* 🖼️ Image with Link */}
-      <Link href={`/product/${product.slug}`}>
+      {/* Image with Link */}
+      <Link href={`/product/${product.slug}`} passHref>
         <div className="relative w-full h-60 cursor-pointer">
           <Image
             src={product.image}
             alt={product.name}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
             className="group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority={true}
           />
         </div>
       </Link>
 
-      {/* 📦 Product Info */}
+      {/* Product Info */}
       <div className="p-4">
-        {/* Title */}
         <Link href={`/product/${product.slug}`}>
           <h3 className="text-lg font-semibold truncate cursor-pointer hover:underline">
             {product.name}
           </h3>
         </Link>
 
-        {/* 🧾 Description */}
         {product.description && (
           <p className="text-sm text-gray-600 mt-1 line-clamp-2">
             {product.description}
           </p>
         )}
 
-        {/* 💵 Price */}
+        {/* Price */}
         <div className="flex items-center gap-2 mt-2">
           <span className="text-xl font-bold text-primary">
             ${product.price.toFixed(2)}
@@ -90,10 +104,11 @@ export default function ProductItem({ product }: ProductProps) {
           )}
         </div>
 
-        {/* 🛒 Add to Cart */}
+        {/* Add to Cart Button */}
         <Button
           onClick={handleAddToCart}
-          className="mt-4 w-full flex items-center justify-center gap-2"
+          className="mt-4 w-full flex items-center justify-center gap-2 cursor-pointer"
+          type="button"
         >
           <ShoppingCart className="w-4 h-4" />
           Add to Cart

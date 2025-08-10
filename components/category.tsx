@@ -42,7 +42,8 @@ export default function Category() {
         {categories.map((category) => (
           <Link
             key={category.slug}
-            href={`/category/${category.slug}`}
+            // href={`/shop/${category.slug}`}
+            href={`/shop`}
             className="group bg-white border border-gray-200 rounded-lg p-4 text-center shadow-sm hover:shadow-md hover:border-primary transition-all duration-200"
           >
             <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-primary transition-colors">

@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import Image from "next/image"
 import Link from "next/link"
+import { useAppDispatch } from "../redux/hook/hook"
+import { addToCart } from "../redux/features/cartSlice"
+import { toast } from "sonner"
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 
 type CategoryType = {
   _id: string
@@ -17,6 +20,7 @@ type CategoryType = {
 type Product = {
   _id: string
   name: string
+  slug: string
   price: number
   image: string
   categoryId: CategoryType
@@ -26,12 +30,13 @@ export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
-  const [minPrice, setMinPrice] = useState(0)
-  const [maxPrice, setMaxPrice] = useState(1000)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [minPrice, setMinPrice] = useState<number>(0)
+  const [maxPrice, setMaxPrice] = useState<number>(1000)
+  const [searchQuery, setSearchQuery] = useState<string>("")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [categories, setCategories] = useState<CategoryType[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
+  const dispatch = useAppDispatch()
 
   const fetchData = async () => {
     try {
@@ -40,7 +45,7 @@ export default function ShopPage() {
       const allProducts: Product[] = data.payload.products
 
       // Price range
-      const prices = allProducts.map(p => p.price)
+      const prices = allProducts.map((p) => p.price)
       const min = Math.min(...prices)
       const max = Math.max(...prices)
 
@@ -51,7 +56,7 @@ export default function ShopPage() {
 
       // Unique categories
       const categoryMap = new Map<string, CategoryType>()
-      allProducts.forEach(p => {
+      allProducts.forEach((p) => {
         if (!categoryMap.has(p.categoryId._id)) {
           categoryMap.set(p.categoryId._id, p.categoryId)
         }
@@ -87,6 +92,11 @@ export default function ShopPage() {
     )
   }
 
+  const handleAddToCart = (product: Product) => {
+    dispatch(addToCart({ id: product._id, name: product.name, image: product.image, price: product.price, qty: 1 }))
+    toast.success(`🛒 ${product.name} added to cart`)
+  }
+
   return (
     <div className="bg-gray-100 py-8 min-h-screen">
       <div className="container mx-auto px-4">
@@ -97,17 +107,17 @@ export default function ShopPage() {
           <aside className="w-full lg:w-1/4 bg-white rounded-xl p-4 shadow">
             <h2 className="text-xl font-semibold mb-4">Filters</h2>
 
-            {/* 🔍 Search */}
+            {/* Search */}
             <div className="mb-6">
               <label className="block font-medium mb-2">Search</label>
               <Input
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            {/* 💰 Price Range */}
+            {/* Price Range */}
             <div className="mb-6">
               <label className="block font-medium mb-2">Price Range</label>
               <Slider
@@ -116,19 +126,23 @@ export default function ShopPage() {
                 step={1}
                 defaultValue={[minPrice, maxPrice]}
                 value={priceRange}
-                onValueChange={(value: [number, number]) => setPriceRange(value)}
+                onValueChange={(value) => {
+                  if (Array.isArray(value) && value.length === 2) {
+                    setPriceRange([value[0], value[1]])
+                  }
+                }}
               />
               <div className="mt-2 text-sm text-gray-600">
                 ${priceRange[0]} - ${priceRange[1]}
               </div>
             </div>
 
-            {/* 📦 Category */}
+            {/* Category */}
             <div>
               <label className="block font-medium mb-2">Category</label>
               <div className="flex flex-col gap-2 text-sm">
                 {categories.map((category) => (
-                  <label key={category._id}>
+                  <label key={category._id} className="cursor-pointer select-none">
                     <input
                       type="checkbox"
                       className="mr-2"
@@ -155,7 +169,7 @@ export default function ShopPage() {
                     key={product._id}
                     className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition"
                   >
-                    <Link href={`/product/${product._id}`}>
+                    <Link href={`/product/${product.slug}`} className="block">
                       <div className="relative aspect-square overflow-hidden rounded-lg">
                         <Image
                           src={product.image}
@@ -166,8 +180,13 @@ export default function ShopPage() {
                       </div>
                       <h3 className="mt-3 font-semibold text-lg">{product.name}</h3>
                       <p className="text-sm text-gray-500">${product.price}</p>
-                      <Button className="mt-2 w-full">Add to Cart</Button>
                     </Link>
+                    <Button
+                      className="mt-2 w-full cursor-pointer"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </Button>
                   </div>
                 ))}
               </div>

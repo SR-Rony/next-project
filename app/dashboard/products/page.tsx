@@ -23,10 +23,6 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<ProductType[]>([]);
 
-  console.log("Products:", products);
-  
-
-  // Fetch products from backend
   useEffect(() => {
     fetch(`${baseUrl}/product`)
       .then((res) => res.json())
@@ -45,76 +41,78 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 mt-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-22">
       <Card>
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>Products</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <CardTitle className="text-lg sm:text-xl font-semibold">Products</CardTitle>
           <Button onClick={() => router.push("/dashboard/products/add")}>
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center gap-4">
+          <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="max-w-xs"
+              className="w-full sm:max-w-xs"
             />
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <TableRow key={product._id}>
-                    <TableCell>
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={50}
-                        height={50}
-                        className="rounded-md"
-                      />
-                    </TableCell>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell>${product.price}</TableCell>
-                    <TableCell>{product.quantity}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => router.push(`/dashboard/products/edit/${product._id}`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDelete(product._id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product._id}>
+                      <TableCell>
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          width={50}
+                          height={50}
+                          className="rounded-md object-cover"
+                        />
+                      </TableCell>
+                      <TableCell>{product.name}</TableCell>
+                      <TableCell>${product.price}</TableCell>
+                      <TableCell>{product.quantity}</TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => router.push(`/dashboard/products/edit/${product._id}`)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(product._id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No products found.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    No products found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>http://localhost:4000/api
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

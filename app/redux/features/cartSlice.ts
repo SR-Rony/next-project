@@ -1,17 +1,15 @@
 "use client"
 
-
-// redux/slices/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-type CartItem = {
+export type CartItem = {
   id: string
   name: string
   price: number
   qty: number
+  image:string
 }
 
-// Don't access localStorage directly here
 const initialState: CartItem[] = []
 
 export const cartSlice = createSlice({
@@ -22,7 +20,14 @@ export const cartSlice = createSlice({
       return action.payload
     },
     addToCart(state, action: PayloadAction<CartItem>) {
-      state.push(action.payload)
+      
+      // Check if product exists
+      const existingIndex = state.findIndex(item => item.id === action.payload.id)
+      if (existingIndex !== -1) {
+        state[existingIndex].qty += 1
+      } else {
+        state.push(action.payload)
+      }
       if (typeof window !== "undefined") {
         localStorage.setItem("cart", JSON.stringify(state))
       }
