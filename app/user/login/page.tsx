@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,59 +12,67 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { setUser } from "@/app/redux/features/authSlice"
-import { useAppDispatch } from "../../redux/hook/hook"
-import { Loader2 } from "lucide-react" // spinner icon
-import { toast } from "sonner"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { setUser } from "@/app/redux/features/authSlice";
+import { useAppDispatch } from "../../redux/hook/hook";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
+  const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false) // ✅ Loader state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true) // ✅ Show loader
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const res = await fetch(`${baseUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+  try {
+    const res = await fetch(`${baseUrl}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: "include", // ✅ send cookies from backend
+    });
 
-      const data = await res.json()
+    const data = await res.json();
+    console.log("user data", data);
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed")
-      }else{
-        toast.success("Login successful!") // ✅ Show success toast
-      }
-
-      dispatch(setUser(data.payload.user)) // ✅ Save user in Redux
-      setTimeout(() => {
-        router.push("/"); // redirect to /verify/email-sent
-      }, 500);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("An unknown error occurred")
-      }
-    } finally {
-      setLoading(false) // ✅ Hide loader
+    if (!res.ok) {
+      throw new Error(data.message || "Login failed");
+    } else {
+      toast.success("Login successful!");
     }
+
+    // ✅ Save user in Redux + localStorage
+    if (data.payload?.user) {
+      localStorage.setItem("user", JSON.stringify(data.payload.user));
+      dispatch(setUser(data.payload.user));
+    }
+
+    setTimeout(() => {
+      router.push("/");
+    }, 500);
+
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("An unknown error occurred");
+    }
+  } finally {
+    setLoading(false);
   }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#1f2937] to-[#111827] px-4">
@@ -131,5 +139,5 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

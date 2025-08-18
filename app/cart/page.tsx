@@ -3,10 +3,12 @@
 import { useEffect } from "react"
 import { setCart, removeFromCart } from "@/app/redux/features/cartSlice"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "../redux/hook/hook"
 
 export default function CartPage() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const cart = useAppSelector((state) => state.cart || [])
 
   // Load cart from localStorage on mount
@@ -32,6 +34,16 @@ export default function CartPage() {
     dispatch(setCart(updatedCart))
   }
 
+  // Proceed to checkout
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!")
+      return
+    }
+    localStorage.setItem("checkoutData", JSON.stringify(cart))
+    router.push("/checkout")
+  }
+
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   return (
@@ -53,7 +65,7 @@ export default function CartPage() {
               <div className="w-28 text-center">Price</div>
               <div className="w-32 text-center">Quantity</div>
               <div className="w-24 text-right">Total</div>
-              <div className="w-24"></div> {/* For Remove button spacing */}
+              <div className="w-24"></div>
             </div>
 
             {/* Cart Items */}
@@ -93,7 +105,6 @@ export default function CartPage() {
                         ? "bg-gray-100 cursor-not-allowed"
                         : "hover:bg-gray-200"
                     }`}
-                    aria-label={`Decrease quantity of ${item.name}`}
                   >
                     −
                   </button>
@@ -101,7 +112,6 @@ export default function CartPage() {
                   <button
                     onClick={() => updateQuantity(item.id, item.qty + 1)}
                     className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-200"
-                    aria-label={`Increase quantity of ${item.name}`}
                   >
                     +
                   </button>
@@ -116,7 +126,6 @@ export default function CartPage() {
                 <button
                   onClick={() => handleRemove(item.id)}
                   className="w-full sm:w-24 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition mt-2 sm:mt-0"
-                  aria-label={`Remove ${item.name} from cart`}
                 >
                   Remove
                 </button>
@@ -143,7 +152,10 @@ export default function CartPage() {
               <span>${totalPrice.toFixed(2)}</span>
             </div>
 
-            <button className="mt-8 w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold transition">
+            <button
+              onClick={handleCheckout}
+              className="mt-8 w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold transition cursor-pointer"
+            >
               Proceed to Checkout
             </button>
           </aside>

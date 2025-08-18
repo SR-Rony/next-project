@@ -100,11 +100,12 @@ export default function Header() {
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#131921] via-[#1f2a38] to-[#131921] text-white shadow-md">
       <div className="container mx-auto py-3">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 md:px-0">
           {/* Left Section */}
           <div className="flex items-center justify-between w-full md:w-auto">
             {/* Mobile Menu */}
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <div className="flex gap-2">
+              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
@@ -137,6 +138,7 @@ export default function Header() {
             >
               Azpero
             </Link>
+            </div>
 
             {/* Mobile Icons */}
             <div className="flex items-center gap-4 md:hidden">
