@@ -50,15 +50,6 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    // if (!token) {
-    //   toast.error("You must be logged in to place an order");
-    //   router.push("/login");
-    //   return;
-    // }
-
     setLoading(true);
 
     try {
