@@ -7,6 +7,7 @@ import banner3 from "@/public/banner/banner3.jpg"
 import headphon from "@/public/banner/headphon.jpg"
 import banner from "@/public/banner/banner.jpg"
 import Image from "next/image"
+import Link from "next/link"
 
 const banners = [
   {
@@ -66,9 +67,9 @@ export default function Banner() {
             <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 md:px-20 text-white">
               <h2 className="text-2xl md:text-5xl font-bold">{slide.title}</h2>
               <p className="text-sm md:text-lg mt-2">{slide.subtitle}</p>
-              <Button className="mt-4 inli inline-block bg-primary text-black hover:bg-hover_color cursor-pointer">
+              <Link href={"/shop"} className="mt-4 inli inline-block text-center bg-primary text-black hover:bg-hover_color cursor-pointer rounded-lg py-2">
                 Shop Now
-              </Button>
+              </Link>
             </div>
           </div>
         ))}

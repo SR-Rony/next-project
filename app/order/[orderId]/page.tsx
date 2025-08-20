@@ -66,6 +66,7 @@ export default function OrderSuccessPage() {
         console.error("Error fetching order:", err);
         setLoading(false);
       });
+    // window.location.reload();
   }, [orderId]);
 
   if (loading) {

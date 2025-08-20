@@ -67,7 +67,7 @@ export default async function ProductDetailsPage({
             </button>
 
             <Link
-              href="/"
+              href="/shop"
               className="mt-4 block text-center text-primary hover:underline text-sm"
             >
               ← Back to Shop

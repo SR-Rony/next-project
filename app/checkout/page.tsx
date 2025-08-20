@@ -90,6 +90,7 @@ export default function CheckoutPage() {
 
       localStorage.removeItem("cart");
       toast.success("Order placed successfully!");
+      
       // router.push(`/order-success`);
       router.push(`/order/${data.payload.order._id}`);
     } catch (error) {
