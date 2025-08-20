@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { UserType } from "@/types/user";
+import { useAppSelector } from "../redux/hook/hook";
 
 const baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -15,7 +17,7 @@ interface ShippingAddress {
 }
 
 interface CartItem {
-  _id: string;
+  id: string;
   name: string;
   qty: number;
   price: number;
@@ -24,6 +26,9 @@ interface CartItem {
 
 export default function CheckoutPage() {
   const router = useRouter();
+    const user: UserType | null = useAppSelector((state) => state.user.user)
+    console.log(user?._id);
+    
   
   const [shipping, setShipping] = useState<ShippingAddress>({
     fullName: "",
@@ -43,6 +48,8 @@ export default function CheckoutPage() {
       setCart(storedCart);
     }
   }, []);
+  console.log(cart);
+  
 
   const itemsPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const shippingPrice = itemsPrice > 2000 ? 0 : 100;
@@ -61,12 +68,13 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           orderItems: cart.map(item => ({
-            productId: item._id,
+            productId: item.id,
             name: item.name,
             qty: item.qty,
             price: item.price,
             image: item.image,
           })),
+          userId : user?._id,
           shippingAddress: shipping,
           paymentMethod,
           itemsPrice,
@@ -75,18 +83,15 @@ export default function CheckoutPage() {
         }),
         credentials: "include",
       });
-
-      console.log("ami",res);
-      
-      
       if (!res.ok) throw new Error("Order creation failed");
 
       const data = await res.json();
-      console.log("Order data:", data);
+      console.log("Order data:", data.payload.order._id);
 
       localStorage.removeItem("cart");
       toast.success("Order placed successfully!");
-      router.push(`/order/${data._id}`);
+      // router.push(`/order-success`);
+      router.push(`/order/${data.payload.order._id}`);
     } catch (error) {
       console.error(error);
       toast.error("Failed to place order");
