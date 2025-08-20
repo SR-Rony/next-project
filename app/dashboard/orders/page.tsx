@@ -12,7 +12,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 type OrderItem = {
   name: string;
-  quantity: number;
+  qty: number;
   price: number;
   image?: string;
 };
@@ -70,8 +70,8 @@ export default function OrdersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
+                  <TableHead>Address</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Paid</TableHead>
@@ -82,61 +82,64 @@ export default function OrdersPage() {
               </TableHeader>
               <TableBody>
                 {filteredOrders.length > 0 ? (
-                  filteredOrders.map((order) => (
-                    <TableRow key={order._id}>
-                      <TableCell>{order._id}</TableCell>
-                      <TableCell>{order.shippingAddress.fullName}</TableCell>
-                      <TableCell>{order.paymentMethod}</TableCell>
-                      <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <Badge variant={order.isPaid ? "default" : "destructive"}>
-                          {order.isPaid ? "Paid" : "Unpaid"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={order.isDelivered ? "default" : "secondary"}>
-                          {order.isDelivered ? "Delivered" : "Pending"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <button className="text-sm text-primary underline hover:text-primary/80">
-                              View Items
-                            </button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Order Items</DialogTitle>
-                            </DialogHeader>
-                            <div className="mt-2 space-y-4">
-                              {order.orderItems.map((item, i) => (
-                                <div key={i} className="flex items-center gap-4">
-                                  {item.image && (
-                                    <div className="w-16 h-16 relative flex-shrink-0">
-                                      <Image
-                                        src={item.image}
-                                        alt={item.name}
-                                        fill
-                                        className="object-contain rounded-md border"
-                                      />
+                  filteredOrders.map((order) => {
+                    const fullAddress = `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}`;
+                    return (
+                      <TableRow key={order._id}>
+                        <TableCell>{order.shippingAddress.fullName}</TableCell>
+                        <TableCell>{fullAddress}</TableCell>
+                        <TableCell>{order.paymentMethod}</TableCell>
+                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge variant={order.isPaid ? "default" : "destructive"}>
+                            {order.isPaid ? "Paid" : "Unpaid"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={order.isDelivered ? "default" : "secondary"}>
+                            {order.isDelivered ? "Delivered" : "Pending"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button className="text-sm text-primary underline hover:text-primary/80">
+                                View Items
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Order Items</DialogTitle>
+                              </DialogHeader>
+                              <div className="mt-2 space-y-4">
+                                {order.orderItems.map((item, i) => (
+                                  <div key={i} className="flex items-center gap-4">
+                                    {item.image && (
+                                      <div className="w-16 h-16 relative flex-shrink-0">
+                                        <Image
+                                          src={item.image}
+                                          alt={item.name}
+                                          fill
+                                          className="object-contain rounded-md border"
+                                        />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="font-medium">{item.name}</p>
+                                      <p className="text-sm text-gray-500">
+                                        Quantity: {item.qty} × ${item.price} = ${item.qty * item.price}
+                                      </p>
                                     </div>
-                                  )}
-                                  <div>
-                                    <p className="font-medium">{item.name}</p>
-                                    <p className="text-sm text-gray-500">
-                                      Quantity: {item.quantity} × ${item.price} = ${item.quantity * item.price}
-                                    </p>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                                ))}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center">

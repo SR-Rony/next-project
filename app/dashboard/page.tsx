@@ -8,6 +8,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserType } from "@/types/user";
 import { useAppSelector } from "../redux/hook/hook";
+import Link from "next/link";
 
 export default function UserDashboard() {
 
@@ -76,7 +77,8 @@ export default function UserDashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <Card className="hover:shadow-lg transition">
+          <Link href={"/dashboard/orders"}>
+            <Card className="hover:shadow-lg transition">
             <CardHeader>
               <CardTitle>Orders</CardTitle>
             </CardHeader>
@@ -84,6 +86,7 @@ export default function UserDashboard() {
               {`user orders`}
             </CardContent>
           </Card>
+          </Link>
           <Card className="hover:shadow-lg transition">
             <CardHeader>
               <CardTitle>Wishlist</CardTitle>

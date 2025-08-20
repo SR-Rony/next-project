@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Home, Printer } from "lucide-react";
+import Image from "next/image";
 
 // ---------- Types ----------
 type OrderItem = {
@@ -149,7 +150,7 @@ export default function OrderSuccessPage() {
                 >
                   <div className="flex items-center gap-3">
                     {product.image && (
-                      <img
+                      <Image
                         src={product.image}
                         alt={product.name}
                         className="w-12 h-12 rounded-md object-cover"
