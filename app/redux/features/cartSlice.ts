@@ -7,7 +7,7 @@ export type CartItem = {
   name: string
   price: number
   qty: number
-  image:string
+  image: string
 }
 
 const initialState: CartItem[] = []
@@ -20,7 +20,6 @@ export const cartSlice = createSlice({
       return action.payload
     },
     addToCart(state, action: PayloadAction<CartItem>) {
-      
       // Check if product exists
       const existingIndex = state.findIndex(item => item.id === action.payload.id)
       if (existingIndex !== -1) {
@@ -39,8 +38,14 @@ export const cartSlice = createSlice({
       }
       return updated
     },
+    clearCart() {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("cart")
+      }
+      return []
+    },
   },
 })
 
-export const { setCart, addToCart, removeFromCart } = cartSlice.actions
+export const { setCart, addToCart, removeFromCart, clearCart } = cartSlice.actions
 export default cartSlice.reducer

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UserType } from "@/types/user";
-import { useAppSelector } from "../redux/hook/hook";
+import { useAppDispatch, useAppSelector } from "../redux/hook/hook";
+import { clearCart} from "../redux/features/cartSlice";
 
 const baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -16,20 +17,12 @@ interface ShippingAddress {
   postalCode: string;
 }
 
-interface CartItem {
-  id: string;
-  name: string;
-  qty: number;
-  price: number;
-  image?: string;
-}
-
 export default function CheckoutPage() {
   const router = useRouter();
-    const user: UserType | null = useAppSelector((state) => state.user.user)
-    console.log(user?._id);
-    
-  
+  const user: UserType | null = useAppSelector((state) => state.user.user);
+  const cart = useAppSelector((state) => state.cart || []);
+  const dispatch = useAppDispatch();
+
   const [shipping, setShipping] = useState<ShippingAddress>({
     fullName: "",
     street: "",
@@ -39,17 +32,6 @@ export default function CheckoutPage() {
   });
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash on Delivery");
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [cart, setCart] = useState<CartItem[]>([]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-      setCart(storedCart);
-    }
-  }, []);
-  console.log(cart);
-  
 
   const itemsPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const shippingPrice = itemsPrice > 2000 ? 0 : 100;
@@ -64,17 +46,16 @@ export default function CheckoutPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          orderItems: cart.map(item => ({
+          orderItems: cart.map((item) => ({
             productId: item.id,
             name: item.name,
             qty: item.qty,
             price: item.price,
             image: item.image,
           })),
-          userId : user?._id,
+          userId: user?._id,
           shippingAddress: shipping,
           paymentMethod,
           itemsPrice,
@@ -86,13 +67,12 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error("Order creation failed");
 
       const data = await res.json();
-      console.log("Order data:", data.payload.order._id);
 
-      localStorage.removeItem("cart");
+      // Clear cart from redux
+      dispatch(clearCart());
       toast.success("Order placed successfully!");
-      
-      // router.push(`/order-success`);
       router.push(`/order/${data.payload.order._id}`);
+
     } catch (error) {
       console.error(error);
       toast.error("Failed to place order");
@@ -107,14 +87,19 @@ export default function CheckoutPage() {
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Shipping & Payment Form */}
-        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-2xl p-6 space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-md rounded-2xl p-6 space-y-5"
+        >
           <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
 
           <input
             type="text"
             placeholder="Full Name"
             value={shipping.fullName}
-            onChange={(e) => setShipping({ ...shipping, fullName: e.target.value })}
+            onChange={(e) =>
+              setShipping({ ...shipping, fullName: e.target.value })
+            }
             required
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
           />
@@ -122,7 +107,9 @@ export default function CheckoutPage() {
             type="text"
             placeholder="Street Address"
             value={shipping.street}
-            onChange={(e) => setShipping({ ...shipping, street: e.target.value })}
+            onChange={(e) =>
+              setShipping({ ...shipping, street: e.target.value })
+            }
             required
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
           />
@@ -131,7 +118,9 @@ export default function CheckoutPage() {
               type="text"
               placeholder="City"
               value={shipping.city}
-              onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
+              onChange={(e) =>
+                setShipping({ ...shipping, city: e.target.value })
+              }
               required
               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
             />
@@ -139,7 +128,9 @@ export default function CheckoutPage() {
               type="text"
               placeholder="Country"
               value={shipping.country}
-              onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
+              onChange={(e) =>
+                setShipping({ ...shipping, country: e.target.value })
+              }
               required
               className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
             />
@@ -148,7 +139,9 @@ export default function CheckoutPage() {
             type="text"
             placeholder="Postal Code"
             value={shipping.postalCode}
-            onChange={(e) => setShipping({ ...shipping, postalCode: e.target.value })}
+            onChange={(e) =>
+              setShipping({ ...shipping, postalCode: e.target.value })
+            }
             required
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
           />
@@ -177,18 +170,32 @@ export default function CheckoutPage() {
         <div className="bg-white shadow-md rounded-2xl p-6 h-fit">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="space-y-2 text-gray-700">
-            <p className="flex justify-between"><span>Items Price</span><span>৳{itemsPrice}</span></p>
-            <p className="flex justify-between"><span>Shipping</span><span>৳{shippingPrice}</span></p>
+            <p className="flex justify-between">
+              <span>Items Price</span>
+              <span>৳{itemsPrice}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Shipping</span>
+              <span>৳{shippingPrice}</span>
+            </p>
             <hr className="my-3" />
-            <p className="flex justify-between font-bold text-lg"><span>Total</span><span>৳{totalPrice}</span></p>
+            <p className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>৳{totalPrice}</span>
+            </p>
           </div>
 
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Cart Items</h3>
             <ul className="space-y-3 max-h-60 overflow-y-auto">
               {cart.map((item, idx) => (
-                <li key={idx} className="flex justify-between items-center border-b pb-2">
-                  <span>{item.name} × {item.qty}</span>
+                <li
+                  key={idx}
+                  className="flex justify-between items-center border-b pb-2"
+                >
+                  <span>
+                    {item.name} × {item.qty}
+                  </span>
                   <span>৳{item.price * item.qty}</span>
                 </li>
               ))}
