@@ -151,9 +151,11 @@ export default function OrderSuccessPage() {
                   <div className="flex items-center gap-3">
                     {product.image && (
                       <Image
+                        className="object-cover"
                         src={product.image}
+                        width={30}
+                        height={30}
                         alt={product.name}
-                        className="w-12 h-12 rounded-md object-cover"
                       />
                     )}
                     <span>
