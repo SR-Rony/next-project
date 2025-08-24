@@ -25,8 +25,6 @@ export default function Category() {
 
     fetchCategories()
   }, [])
-
-  console.log("backend api",baseUrl);
   
 
   return (

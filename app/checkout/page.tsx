@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UserType } from "@/types/user";
 import { useAppDispatch, useAppSelector } from "../redux/hook/hook";
-import { clearCart} from "../redux/features/cartSlice";
+import { clearCart } from "../redux/features/cartSlice";
+import Image from "next/image";
 
-const baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 interface ShippingAddress {
   fullName: string;
@@ -31,7 +32,7 @@ export default function CheckoutPage() {
     postalCode: "",
   });
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash on Delivery");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const itemsPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const shippingPrice = itemsPrice > 2000 ? 0 : 100;
@@ -39,20 +40,38 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    if(!user){
-      setLoading(false)
-      toast.error("you are not login please login")
-      router.push("/user/login")
+    if (!user) {
+      toast.error("You must login first!");
+      router.push("/user/login");
+      return;
     }
 
+    setLoading(true);
+
     try {
+      // 1️⃣ Fetch latest stock for cart items
+      const resStock = await fetch(`${baseUrl}/product/stock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productIds: cart.map((item) => item.id) }),
+      });
+      const stockData: Record<string, number> = await resStock.json();
+
+      for (const item of cart) {
+        const available = stockData[item.id] ?? 0;
+        if (item.qty > available) {
+          toast.error(`Not enough stock for ${item.name}. Available: ${available}`);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2️⃣ Place order
       const res = await fetch(`${baseUrl}/orders`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId: user._id,
           orderItems: cart.map((item) => ({
             productId: item.id,
             name: item.name,
@@ -60,7 +79,6 @@ export default function CheckoutPage() {
             price: item.price,
             image: item.image,
           })),
-          userId: user?._id,
           shippingAddress: shipping,
           paymentMethod,
           itemsPrice,
@@ -69,92 +87,80 @@ export default function CheckoutPage() {
         }),
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Order creation failed");
+
+      if (!res.ok) throw new Error("Order failed");
 
       const data = await res.json();
-
-      // Clear cart from redux
       dispatch(clearCart());
       toast.success("Order placed successfully!");
       router.push(`/order/${data.payload.order._id}`);
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to place order.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 mt-16">
+    <div className="container mx-auto px-4 md:px-6 py-12 mt-16">
       <h1 className="text-3xl font-bold text-center mb-10">Checkout</h1>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Shipping & Payment Form */}
+        {/* Shipping Form */}
         <form
           onSubmit={handleSubmit}
           className="bg-white shadow-md rounded-2xl p-6 space-y-5"
         >
           <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-
           <input
             type="text"
             placeholder="Full Name"
             value={shipping.fullName}
-            onChange={(e) =>
-              setShipping({ ...shipping, fullName: e.target.value })
-            }
+            onChange={(e) => setShipping({ ...shipping, fullName: e.target.value })}
             required
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           />
           <input
             type="text"
             placeholder="Street Address"
             value={shipping.street}
-            onChange={(e) =>
-              setShipping({ ...shipping, street: e.target.value })
-            }
+            onChange={(e) => setShipping({ ...shipping, street: e.target.value })}
             required
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           />
           <div className="grid grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="City"
               value={shipping.city}
-              onChange={(e) =>
-                setShipping({ ...shipping, city: e.target.value })
-              }
+              onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
               required
-              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
             />
             <input
               type="text"
               placeholder="Country"
               value={shipping.country}
-              onChange={(e) =>
-                setShipping({ ...shipping, country: e.target.value })
-              }
+              onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
               required
-              className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <input
             type="text"
             placeholder="Postal Code"
             value={shipping.postalCode}
-            onChange={(e) =>
-              setShipping({ ...shipping, postalCode: e.target.value })
-            }
+            onChange={(e) => setShipping({ ...shipping, postalCode: e.target.value })}
             required
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           />
 
           <h2 className="text-xl font-semibold mt-6 mb-3">Payment Method</h2>
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary outline-none"
+            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           >
             <option>Cash on Delivery</option>
             <option>Stripe</option>
@@ -171,40 +177,25 @@ export default function CheckoutPage() {
         </form>
 
         {/* Order Summary */}
-        <div className="bg-white shadow-md rounded-2xl p-6 h-fit">
+        <div className="bg-white shadow-md rounded-2xl p-6">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="space-y-2 text-gray-700">
-            <p className="flex justify-between">
-              <span>Items Price</span>
-              <span>৳{itemsPrice}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Shipping</span>
-              <span>৳{shippingPrice}</span>
-            </p>
+            <p className="flex justify-between"><span>Items</span><span>৳{itemsPrice}</span></p>
+            <p className="flex justify-between"><span>Shipping</span><span>৳{shippingPrice}</span></p>
             <hr className="my-3" />
-            <p className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>৳{totalPrice}</span>
-            </p>
+            <p className="flex justify-between font-bold text-lg"><span>Total</span><span>৳{totalPrice}</span></p>
           </div>
 
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Cart Items</h3>
-            <ul className="space-y-3 max-h-60 overflow-y-auto">
-              {cart.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center border-b pb-2"
-                >
-                  <span>
-                    {item.name} × {item.qty}
-                  </span>
-                  <span>৳{item.price * item.qty}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h3 className="text-lg font-semibold mt-6 mb-2">Cart Items</h3>
+          <ul className="space-y-3 max-h-60 overflow-y-auto">
+            {cart.map((item, idx) => (
+              <li key={idx} className="flex justify-between items-center border-b pb-2">
+                <Image src={item.image} width={50} height={50} className="object-cover" alt={item.name} />
+                <span>{item.name} × {item.qty}</span>
+                <span>৳{item.price * item.qty}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+
 import { useState, useEffect } from "react"
 import watch from "@/public/banner/watch.jpg"
 import banner3 from "@/public/banner/banner3.jpg"

@@ -83,7 +83,7 @@ export default function ProductsPage() {
                         />
                       </TableCell>
                       <TableCell>{product.name}</TableCell>
-                      <TableCell>${product.price}</TableCell>
+                      <TableCell>৳{Number(product.price).toLocaleString("en-BD")}</TableCell>
                       <TableCell>{product.quantity}</TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button

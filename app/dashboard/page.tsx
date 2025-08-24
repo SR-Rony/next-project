@@ -14,19 +14,6 @@ export default function UserDashboard() {
 
   const user: UserType | null = useAppSelector((state) => state.user.user)
 
-  const [users] = useState({
-    name: "SR Rony",
-    email: "rony@example.com",
-    avatar: "/avatar.png",
-    orders: 12,
-    wishlist: 5,
-    addresses: 3,
-    recentOrders: [
-      { id: "ORD-001", date: "2025-08-01", total: "$120", status: "Delivered" },
-      { id: "ORD-002", date: "2025-07-20", total: "$89", status: "Shipped" },
-      { id: "ORD-003", date: "2025-07-10", total: "$45", status: "Pending" },
-    ],
-  });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

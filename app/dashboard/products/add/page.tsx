@@ -1,6 +1,5 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,8 @@ import {
 } from "@/components/ui/card";
 import Image from "next/image";
 import { toast } from "sonner";
+
+const baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 interface Category {
   _id: string;
@@ -43,10 +44,13 @@ export default function AddProductPage() {
         const res = await fetch(`${baseUrl}/category`);
         const data = await res.json();
         if (res.ok) {
-          setCategories(data.payload);
+          setCategories(data.payload || []);
+        } else {
+          toast.error(data.message || "Failed to load categories");
         }
       } catch (err) {
         console.error("Failed to load categories", err);
+        toast.error("Failed to load categories");
       }
     };
 
@@ -74,14 +78,14 @@ export default function AddProductPage() {
       !form.categoryId ||
       !form.image
     ) {
-      toast("Please fill in all fields correctly.");
+      toast.error("Please fill in all fields correctly.");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("description", form.description);
-    formData.append("price", form.price);
+    formData.append("price", form.price); // price stays as number
     formData.append("quantity", form.quantity);
     formData.append("shipping", form.shipping ? "1" : "0");
     formData.append("categoryId", form.categoryId);
@@ -96,8 +100,8 @@ export default function AddProductPage() {
       });
 
       const result = await res.json();
-      console.log("Response:", result.payload.success);
-      
+
+      console.log("Response:", result.payload);
 
       if (res.ok) {
         toast.success("Product created successfully");
@@ -118,11 +122,12 @@ export default function AddProductPage() {
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Add New Product</CardTitle>
-          <CardDescription>Upload a new product to your store.</CardDescription>
+          <CardDescription>
+            Upload a new product to your store.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Product Name</Label>
               <Input
@@ -136,7 +141,6 @@ export default function AddProductPage() {
               />
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <textarea
@@ -152,9 +156,8 @@ export default function AddProductPage() {
               />
             </div>
 
-            {/* Price */}
             <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Price (৳)</Label>
               <Input
                 id="price"
                 type="number"
@@ -164,12 +167,16 @@ export default function AddProductPage() {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, price: e.target.value }))
                 }
-                placeholder="Enter price"
+                placeholder="Enter price in ৳"
                 required
               />
+              {form.price && (
+                <p className="text-sm text-gray-600">
+                  Preview: <span className="font-semibold">৳{Number(form.price).toLocaleString("en-BD")}</span>
+                </p>
+              )}
             </div>
 
-            {/* Quantity */}
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantity</Label>
               <Input
@@ -185,7 +192,6 @@ export default function AddProductPage() {
               />
             </div>
 
-            {/* Shipping */}
             <div className="space-y-2 flex items-center gap-2">
               <input
                 id="shipping"
@@ -200,7 +206,6 @@ export default function AddProductPage() {
               </Label>
             </div>
 
-            {/* Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image">Product Image</Label>
               <Input
@@ -221,7 +226,6 @@ export default function AddProductPage() {
               )}
             </div>
 
-            {/* Category Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <select
@@ -242,7 +246,6 @@ export default function AddProductPage() {
               </select>
             </div>
 
-            {/* Submit */}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Submitting..." : "Add Product"}
             </Button>

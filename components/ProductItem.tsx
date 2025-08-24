@@ -88,8 +88,8 @@ export default function ProductItem({ product }: ProductProps){
         {/* Price */}
         <div className="flex items-center gap-2 mt-2">
           <span className="text-xl font-bold text-primary">
-            ${product.price.toFixed(2)}
-          </span>
+          ৳{Number(product.price).toLocaleString("en-BD", { minimumFractionDigits: 2 })}
+        </span>
           {product.originalPrice && (
             <>
               <span className="line-through text-gray-500 text-sm">
