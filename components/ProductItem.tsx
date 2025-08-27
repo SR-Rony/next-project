@@ -8,23 +8,24 @@ import { toast } from "sonner";
 import { useAppDispatch } from "@/app/redux/hook/hook";
 import { addToCart } from "@/app/redux/features/cartSlice";
 
-interface ProductProps {
-  product: {
-    _id: string;
-    name: string;
-    slug: string;
-    price: number;
-    originalPrice?: number;
-    image: string;
-    description?: string;
-    rating?: number;
-    isPopular?: boolean;
-    quantity?: number; // default 1 for cart
-  };
+interface Product {
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  description?: string;
+  rating?: number;
+  isPopular?: boolean;
+  quantity?: number; // default 1 for cart
 }
 
+interface ProductProps {
+  product: Product;
+}
 
-export default function ProductItem({ product }: ProductProps){
+export default function ProductItem({ product }: ProductProps) {
   const discount =
     product.originalPrice && product.originalPrice > product.price
       ? Math.round(
@@ -41,7 +42,7 @@ export default function ProductItem({ product }: ProductProps){
         name: product.name,
         price: product.price,
         qty: 1,
-        image: product.image, // Add image here, important if your cart slice expects it
+        image: product.image,
       })
     );
     toast.success(`🛒 ${product.name} added to cart`);
@@ -63,10 +64,9 @@ export default function ProductItem({ product }: ProductProps){
             src={product.image}
             alt={product.name}
             fill
-            style={{ objectFit: "cover" }}
-            className="group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 768px) 100vw, 50vw"
-            priority={true}
+            priority
           />
         </div>
       </Link>
@@ -88,12 +88,15 @@ export default function ProductItem({ product }: ProductProps){
         {/* Price */}
         <div className="flex items-center gap-2 mt-2">
           <span className="text-xl font-bold text-primary">
-          ৳{Number(product.price).toLocaleString("en-BD", { minimumFractionDigits: 2 })}
-        </span>
+            ৳
+            {Number(product.price).toLocaleString("en-BD", {
+              minimumFractionDigits: 2,
+            })}
+          </span>
           {product.originalPrice && (
             <>
               <span className="line-through text-gray-500 text-sm">
-                ${product.originalPrice.toFixed(2)}
+                ৳{product.originalPrice.toFixed(2)}
               </span>
               {discount && (
                 <span className="text-green-600 text-sm font-medium">
@@ -105,14 +108,25 @@ export default function ProductItem({ product }: ProductProps){
         </div>
 
         {/* Add to Cart Button */}
-        <Button
-          onClick={handleAddToCart}
-          className="mt-4 w-full flex items-center justify-center gap-2 cursor-pointer"
-          type="button"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          Add to Cart
-        </Button>
+        {product.quantity && product.quantity > 0 ? (
+          <Button
+            onClick={handleAddToCart}
+            className="mt-4 w-full flex items-center justify-center gap-2 cursor-pointer"
+            type="button"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Add to Cart
+          </Button>
+        ) : (
+          <Button
+            disabled
+            className="mt-4 w-full flex items-center justify-center gap-2 cursor-pointer"
+            type="button"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Out of stock
+          </Button>
+        )}
       </div>
     </div>
   );

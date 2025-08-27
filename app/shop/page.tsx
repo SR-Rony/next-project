@@ -24,6 +24,7 @@ type Product = {
   price: number
   image: string
   categoryId: CategoryType
+  quantity?: number   // ✅ added this so product.quantity works
 }
 
 export default function ShopPage() {
@@ -93,7 +94,15 @@ export default function ShopPage() {
   }
 
   const handleAddToCart = (product: Product) => {
-    dispatch(addToCart({ id: product._id, name: product.name, image: product.image, price: product.price, qty: 1 }))
+    dispatch(
+      addToCart({
+        id: product._id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        qty: 1,
+      })
+    )
     toast.success(`🛒 ${product.name} added to cart`)
   }
 
@@ -113,7 +122,7 @@ export default function ShopPage() {
               <Input
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
@@ -124,16 +133,15 @@ export default function ShopPage() {
                 min={minPrice}
                 max={maxPrice}
                 step={1}
-                defaultValue={[minPrice, maxPrice]}
                 value={priceRange}
-                onValueChange={(value) => {
-                  if (Array.isArray(value) && value.length === 2) {
+                onValueChange={(value: number[]) => {
+                  if (value.length === 2) {
                     setPriceRange([value[0], value[1]])
                   }
                 }}
               />
               <div className="mt-2 text-sm text-gray-600">
-                ${priceRange[0]} - ${priceRange[1]}
+                ৳{priceRange[0]} - ৳{priceRange[1]}
               </div>
             </div>
 
@@ -179,14 +187,21 @@ export default function ShopPage() {
                         />
                       </div>
                       <h3 className="mt-3 font-semibold text-lg">{product.name}</h3>
-                      <p className="text-sm text-gray-500">${product.price}</p>
+                      <p className="text-sm text-gray-500">৳{product.price}</p>
                     </Link>
-                    <Button
-                      className="mt-2 w-full cursor-pointer"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      Add to Cart
-                    </Button>
+
+                    {product.quantity && product.quantity > 0 ? (
+                      <Button
+                        className="mt-2 w-full cursor-pointer"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        Add to Cart
+                      </Button>
+                    ) : (
+                      <Button disabled className="mt-2 w-full cursor-pointer">
+                        Out of stock
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
