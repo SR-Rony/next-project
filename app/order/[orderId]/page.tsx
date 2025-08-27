@@ -22,8 +22,8 @@ type ShippingAddress = {
   fullName: string;
   street: string;
   city: string;
-  country: string;
-  postalCode: string;
+  upzila: string;
+  phone: string;
 };
 
 type User = {
@@ -53,6 +53,7 @@ export default function OrderSuccessPage() {
   const [order, setOrder] = useState<OrderType | null>(null);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     if (!orderId) return;
     setLoading(true);
@@ -67,8 +68,8 @@ export default function OrderSuccessPage() {
         console.error("Error fetching order:", err);
         setLoading(false);
       });
-    // window.location.reload();
   }, [orderId]);
+  
 
   if (loading) {
     return (
@@ -102,16 +103,12 @@ export default function OrderSuccessPage() {
           {/* Order Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
             <div className="flex justify-between">
-              <span className="font-semibold">Order ID:</span>
-              <span className="text-gray-600">{order._id}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="font-semibold">Customer:</span>
               <span className="text-gray-600">{order.shippingAddress.fullName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-semibold">Email:</span>
-              <span className="text-gray-600">{order.user?.email}</span>
+              <span className="font-semibold">Phone:</span>
+              <span className="text-gray-600">{order.shippingAddress?.phone}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-semibold">Payment:</span>
@@ -128,7 +125,8 @@ export default function OrderSuccessPage() {
                     : "bg-gray-400"
                 } text-white`}
               >
-                {order.status || (order.isDelivered ? "Delivered" : order.isPaid ? "Paid" : "Pending")}
+                {order.status ||
+                  (order.isDelivered ? "Delivered" : order.isPaid ? "Paid" : "Pending")}
               </Badge>
             </div>
             <div className="flex justify-between">
@@ -162,7 +160,8 @@ export default function OrderSuccessPage() {
                       {product.name} × {product.qty}
                     </span>
                   </div>
-                  <span className="font-medium">${product.price * product.qty}</span>
+                  {/* ✅ changed $ to ৳ */}
+                  <span className="font-medium">৳{product.price * product.qty}</span>
                 </div>
               ))}
             </div>
@@ -171,7 +170,8 @@ export default function OrderSuccessPage() {
           {/* Total */}
           <div className="flex justify-between text-lg font-bold pt-4 border-t">
             <span>Total:</span>
-            <span>${order.totalPrice.toFixed(2)}</span>
+            {/* ✅ changed $ to ৳ */}
+            <span>৳{order.totalPrice.toFixed(2)}</span>
           </div>
 
           {/* Buttons */}

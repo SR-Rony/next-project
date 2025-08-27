@@ -19,6 +19,7 @@ import {
 import { logout } from "@/app/redux/features/authSlice"
 import { UserType } from "@/types/user"
 import MobileBottomMenu from "./menu"
+import SiteMenu from "./siteMenu"
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -117,16 +118,7 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-4 bg-[#1f2a38] text-white">
                 <nav className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-4rem)]">
-                  {menuItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="hover:text-primary transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+                  <SiteMenu/>
                 </nav>
               </SheetContent>
             </Sheet>

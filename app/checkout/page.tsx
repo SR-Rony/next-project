@@ -14,8 +14,8 @@ interface ShippingAddress {
   fullName: string;
   street: string;
   city: string;
-  country: string;
-  postalCode: string;
+  upazila: string;
+  phone: string; // ✅ changed to string
 }
 
 export default function CheckoutPage() {
@@ -28,21 +28,23 @@ export default function CheckoutPage() {
     fullName: "",
     street: "",
     city: "",
-    country: "",
-    postalCode: "",
+    upazila: "",
+    phone: "", // ✅ now valid
   });
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash on Delivery");
   const [loading, setLoading] = useState(false);
 
   const itemsPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const shippingPrice = itemsPrice > 2000 ? 0 : 100;
+  const shippingPrice = itemsPrice > 5000 ? 0 : 120;
   const totalPrice = itemsPrice + shippingPrice;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       toast.error("You must login first!");
-      router.push("/user/login");
+      setTimeout(() => {
+        router.push("/user/login");
+      }, 1000);
       return;
     }
 
@@ -121,14 +123,6 @@ export default function CheckoutPage() {
             required
             className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           />
-          <input
-            type="text"
-            placeholder="Street Address"
-            value={shipping.street}
-            onChange={(e) => setShipping({ ...shipping, street: e.target.value })}
-            required
-            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
-          />
           <div className="grid grid-cols-2 gap-4">
             <input
               type="text"
@@ -140,18 +134,26 @@ export default function CheckoutPage() {
             />
             <input
               type="text"
-              placeholder="Country"
-              value={shipping.country}
-              onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
+              placeholder="Upazila"
+              value={shipping.upazila}
+              onChange={(e) => setShipping({ ...shipping, upazila: e.target.value })}
               required
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
+           <input
+            type="text"
+            placeholder="Street Address"
+            value={shipping.street}
+            onChange={(e) => setShipping({ ...shipping, street: e.target.value })}
+            required
+            className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
+          />
           <input
             type="text"
-            placeholder="Postal Code"
-            value={shipping.postalCode}
-            onChange={(e) => setShipping({ ...shipping, postalCode: e.target.value })}
+            placeholder="Phone Number"
+            value={shipping.phone}
+            onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
             required
             className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           />
@@ -163,7 +165,7 @@ export default function CheckoutPage() {
             className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary"
           >
             <option>Cash on Delivery</option>
-            <option>Stripe</option>
+            <option>Nogod</option>
             <option>Bkash</option>
           </select>
 
@@ -180,18 +182,38 @@ export default function CheckoutPage() {
         <div className="bg-white shadow-md rounded-2xl p-6">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="space-y-2 text-gray-700">
-            <p className="flex justify-between"><span>Items</span><span>৳{itemsPrice}</span></p>
-            <p className="flex justify-between"><span>Shipping</span><span>৳{shippingPrice}</span></p>
+            <p className="flex justify-between">
+              <span>Items</span>
+              <span>৳{itemsPrice}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Shipping</span>
+              <span>৳{shippingPrice}</span>
+            </p>
             <hr className="my-3" />
-            <p className="flex justify-between font-bold text-lg"><span>Total</span><span>৳{totalPrice}</span></p>
+            <p className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>৳{totalPrice}</span>
+            </p>
           </div>
 
           <h3 className="text-lg font-semibold mt-6 mb-2">Cart Items</h3>
           <ul className="space-y-3 max-h-60 overflow-y-auto">
             {cart.map((item, idx) => (
-              <li key={idx} className="flex justify-between items-center border-b pb-2">
-                <Image src={item.image} width={50} height={50} className="object-cover" alt={item.name} />
-                <span>{item.name} × {item.qty}</span>
+              <li
+                key={idx}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <Image
+                  src={item.image}
+                  width={50}
+                  height={50}
+                  className="object-cover"
+                  alt={item.name}
+                />
+                <span>
+                  {item.name} × {item.qty}
+                </span>
                 <span>৳{item.price * item.qty}</span>
               </li>
             ))}
