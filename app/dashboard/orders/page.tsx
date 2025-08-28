@@ -23,9 +23,9 @@ type OrderType = {
   shippingAddress: {
     fullName: string;
     city: string;
-    country: string;
+    upazila: string;
     street: string;
-    postalCode: string;
+    phone: string;
   };
   email?: string;
   paymentMethod: string;
@@ -49,9 +49,12 @@ export default function OrdersPage() {
       .catch((err) => console.error(err));
   }, []);
 
-  const filteredOrders = orders.filter((o) =>
-    o.shippingAddress.fullName.toLowerCase().includes(search.toLowerCase())
-  );
+  // ✅ Filter + Sort (newest first)
+  const filteredOrders = orders
+    .filter((o) =>
+      o.shippingAddress.fullName.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16">
@@ -83,13 +86,13 @@ export default function OrdersPage() {
               <TableBody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => {
-                    const fullAddress = `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}`;
+                    const fullAddress = `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.upazila}, ${order.shippingAddress.phone}`;
                     return (
                       <TableRow key={order._id}>
                         <TableCell>{order.shippingAddress.fullName}</TableCell>
                         <TableCell>{fullAddress}</TableCell>
                         <TableCell>{order.paymentMethod}</TableCell>
-                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+                        <TableCell>৳{order.totalPrice.toFixed(2)}</TableCell>
                         <TableCell>
                           <Badge variant={order.isPaid ? "default" : "destructive"}>
                             {order.isPaid ? "Paid" : "Unpaid"}
@@ -128,7 +131,7 @@ export default function OrdersPage() {
                                     <div>
                                       <p className="font-medium">{item.name}</p>
                                       <p className="text-sm text-gray-500">
-                                        Quantity: {item.qty} × ${item.price} = ${item.qty * item.price}
+                                        Quantity: {item.qty} × ৳{item.price} = ৳{item.qty * item.price}
                                       </p>
                                     </div>
                                   </div>

@@ -44,7 +44,10 @@ export default function CartPage() {
     router.push("/checkout")
   }
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+  // --- PRICES ---
+  const shippingCost = 120 // Flat shipping charge in Taka
+  const subtotal = cart.reduce((sum, item) => sum + Number(item.price || 0) * (item.qty || 1), 0)
+  const total = subtotal + (cart.length > 0 ? shippingCost : 0)
 
   return (
     <div className="container mx-auto px-4 mt-16 max-w-7xl">
@@ -92,7 +95,7 @@ export default function CartPage() {
 
                 {/* Product Price */}
                 <p className="w-full sm:w-28 text-center text-gray-700 font-semibold mt-2 sm:mt-0">
-                  ${item.price.toFixed(2)}
+                  ৳{Number(item.price || 0).toFixed(2)}
                 </p>
 
                 {/* Quantity Controls */}
@@ -119,7 +122,7 @@ export default function CartPage() {
 
                 {/* Total Price */}
                 <p className="w-full sm:w-24 text-right text-lg font-bold mt-2 sm:mt-0">
-                  ${(item.price * item.qty).toFixed(2)}
+                  ৳{(Number(item.price || 0) * (item.qty || 1)).toFixed(2)}
                 </p>
 
                 {/* Remove Button */}
@@ -139,22 +142,22 @@ export default function CartPage() {
 
             <div className="flex justify-between mb-4">
               <span className="text-gray-700 font-medium">Subtotal</span>
-              <span className="font-semibold">${totalPrice.toFixed(2)}</span>
+              <span className="font-semibold">৳{subtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between mb-4 text-gray-500">
               <span>Shipping</span>
-              <span>Free</span>
+              <span>৳{shippingCost.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>৳{total.toFixed(2)}</span>
             </div>
 
             <button
               onClick={handleCheckout}
-              className="mt-8 w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold transition cursor-pointer"
+              className="mt-8 w-full bg-primary hover:bg-hover_color text-white py-3 rounded-lg font-semibold transition cursor-pointer"
             >
               Proceed to Checkout
             </button>
