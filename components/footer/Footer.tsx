@@ -91,14 +91,6 @@ export default function Footer() {
             <p className="text-sm leading-relaxed mb-4">
               Get the latest deals and updates straight to your inbox.
             </p>
-            <form className="flex items-center gap-2">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-white dark:bg-gray-800"
-              />
-              <Button variant="default">Subscribe</Button>
-            </form>
             <div className="flex gap-4 mt-6 text-gray-500 dark:text-gray-400">
               {socialIcons.map(({ icon, href }, index) => (
                 <Link
