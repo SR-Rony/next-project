@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Edit, Trash, Plus } from "lucide-react";
 import Image from "next/image";
 
@@ -16,12 +24,15 @@ type ProductType = {
   price: number;
   quantity: number;
   image: string;
+  slug :string
 };
 
 export default function ProductsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [open, setOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
 
   useEffect(() => {
     fetch(`${baseUrl}/product`)
@@ -38,6 +49,31 @@ export default function ProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
     await fetch(`${baseUrl}/product/${id}`, { method: "DELETE" });
     setProducts((prev) => prev.filter((p) => p._id !== id));
+  };
+
+  const handleEdit = (product: ProductType) => {
+    setSelectedProduct(product);
+    setOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!selectedProduct) return;
+
+    const res = await fetch(`${baseUrl}/product/${selectedProduct.slug}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selectedProduct),
+    });
+      
+    if (res.ok) {
+      
+      setProducts((prev) =>
+        prev.map((p) => (p.slug === selectedProduct.slug ? selectedProduct : p))
+      );
+      setOpen(false);
+    } else {
+      alert("Failed to update product");
+    }
   };
 
   return (
@@ -89,7 +125,7 @@ export default function ProductsPage() {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => router.push(`/dashboard/products/edit/${product._id}`)}
+                          onClick={() => handleEdit(product)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -115,6 +151,54 @@ export default function ProductsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Modal */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <Input
+                placeholder="Name"
+                value={selectedProduct.name}
+                onChange={(e) =>
+                  setSelectedProduct({ ...selectedProduct, name: e.target.value })
+                }
+              />
+              <Input
+                placeholder="Price"
+                type="number"
+                value={selectedProduct.price}
+                onChange={(e) =>
+                  setSelectedProduct({
+                    ...selectedProduct,
+                    price: Number(e.target.value),
+                  })
+                }
+              />
+              <Input
+                placeholder="Quantity"
+                type="number"
+                value={selectedProduct.quantity}
+                onChange={(e) =>
+                  setSelectedProduct({
+                    ...selectedProduct,
+                    quantity: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+          )}
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
