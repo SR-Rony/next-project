@@ -30,48 +30,51 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const res = await fetch(`${baseUrl}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-      credentials: "include", // ✅ send cookies from backend
-    });
+    try {
+      const res = await fetch(`${baseUrl}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // ✅ keep if you also set HttpOnly refresh token
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || "Login failed");
-    } else {
-      toast.success("Login successful!");
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      } else {
+        toast.success("Login successful!");
+      }
+
+      // ✅ Save user and token in localStorage + Redux
+      if (data.payload?.user && data.payload?.accessToken) {
+        localStorage.setItem("user", JSON.stringify(data.payload.user));
+        localStorage.setItem("accessToken", data.payload.accessToken); // 🔑 store token
+        dispatch(setUser(data.payload.user));
+      }
+
+      // ✅ Redirect after login
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
+
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // ✅ Save user in Redux + localStorage
-    if (data.payload?.user) {
-      localStorage.setItem("user", JSON.stringify(data.payload.user));
-      dispatch(setUser(data.payload.user));
-    }
-
-    setTimeout(() => {
-      router.push("/");
-    }, 500);
-
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      setError(err.message);
-    } else {
-      setError("An unknown error occurred");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#1f2937] to-[#111827] px-4">

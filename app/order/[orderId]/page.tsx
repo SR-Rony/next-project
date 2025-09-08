@@ -26,15 +26,8 @@ type ShippingAddress = {
   phone: string;
 };
 
-type User = {
-  _id: string;
-  name: string;
-  email: string;
-};
-
 type OrderType = {
   _id: string;
-  user: User;
   orderItems: OrderItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: string;
@@ -62,6 +55,8 @@ export default function OrderSuccessPage() {
       .then((res) => res.json())
       .then((data) => {
         setOrder(data);
+        console.log(data);
+        
         setLoading(false);
       })
       .catch((err) => {

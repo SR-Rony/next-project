@@ -36,15 +36,43 @@ export default function CustomersPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // const fetchCustomers = async () => {
+  //   try {
+  //     const res = await fetch(`${baseUrl}/user?search=${search}`);
+  //     const data = await res.json();
+  //     setCustomers(data.payload.allUser || []);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
   const fetchCustomers = async () => {
-    try {
-      const res = await fetch(`${baseUrl}/user?search=${search}`);
-      const data = await res.json();
-      setCustomers(data.payload.allUser || []);
-    } catch (err) {
-      console.error(err);
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.error("No token found. Please login again.");
+      return;
     }
-  };
+
+    const res = await fetch(`${baseUrl}/user?search=`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // ✅ send token
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    setCustomers(data.payload.allUser || []);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  }
+};
+
 
   useEffect(() => {
     fetchCustomers();

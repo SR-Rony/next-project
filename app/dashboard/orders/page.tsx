@@ -43,11 +43,36 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderType[]>([]);
 
   useEffect(() => {
-    fetch(`${baseUrl}/orders`)
-      .then((res) => res.json())
-      .then((data) => setOrders(data.payload || []))
-      .catch((err) => console.error(err));
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("accessToken"); // 🔑 get token
+        if (!token) {
+          console.error("No access token found. Please login again.");
+          return;
+        }
+
+        const res = await fetch(`${baseUrl}/orders`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // ✅ attach token
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setOrders(data.payload || []); // ✅ safe fallback
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      }
+    };
+
+    fetchOrders();
   }, []);
+  
 
   // ✅ Filter + Sort (newest first)
   const filteredOrders = orders
@@ -55,6 +80,7 @@ export default function OrdersPage() {
       o.shippingAddress.fullName.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-16">

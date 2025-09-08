@@ -40,13 +40,6 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error("You must login first!");
-      setTimeout(() => {
-        router.push("/user/login");
-      }, 1000);
-      return;
-    }
 
     setLoading(true);
 
@@ -73,7 +66,6 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user._id,
           orderItems: cart.map((item) => ({
             productId: item.id,
             name: item.name,
