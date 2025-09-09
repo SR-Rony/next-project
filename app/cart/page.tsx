@@ -5,11 +5,15 @@ import { setCart, removeFromCart } from "@/app/redux/features/cartSlice"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "../redux/hook/hook"
+import { Button } from "@/components/ui/button"
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function CartPage() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const cart = useAppSelector((state) => state.cart || [])
+
+  const phoneNumber = "01743493707"; // Your number
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -43,6 +47,11 @@ export default function CartPage() {
     localStorage.setItem("checkoutData", JSON.stringify(cart))
     router.push("/checkout")
   }
+
+  const handleWhatsApp = () => {
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank"); // Open WhatsApp in new tab
+  };
 
   // --- PRICES ---
   const shippingCost = 120 // Flat shipping charge in Taka
@@ -155,12 +164,23 @@ export default function CartPage() {
               <span>৳{total.toFixed(2)}</span>
             </div>
 
-            <button
+            <Button
               onClick={handleCheckout}
-              className="mt-8 w-full bg-primary hover:bg-hover_color text-white py-3 rounded-lg font-semibold transition cursor-pointer"
+              className="mt-8 w-full bg-primary hover:bg-hover_color text-white py-5 rounded-lg font-semibold transition cursor-pointer"
             >
               Proceed to Checkout
-            </button>
+            </Button>
+             <Button
+              onClick={handleWhatsApp}
+              className="mt-8 w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-lg font-semibold flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {/* Animated WhatsApp Icon */}
+              <FaWhatsapp
+                size={22}
+                className="animate-bounce text-white"
+              />
+              {phoneNumber}
+            </Button>
           </aside>
         </div>
       )}

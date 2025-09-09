@@ -36,16 +36,6 @@ export default function CustomersPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // const fetchCustomers = async () => {
-  //   try {
-  //     const res = await fetch(`${baseUrl}/user?search=${search}`);
-  //     const data = await res.json();
-  //     setCustomers(data.payload.allUser || []);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
   const fetchCustomers = async () => {
   try {
     const token = localStorage.getItem("accessToken");

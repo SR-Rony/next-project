@@ -36,6 +36,7 @@ type OrderType = {
   createdAt: string;
   isPaid: boolean;
   isDelivered: boolean;
+  shippingPrice :number
 };
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -160,6 +161,10 @@ export default function OrderSuccessPage() {
                 </div>
               ))}
             </div>
+                <div className="flex justify-between items-center mt-9 px-3">
+                  <p>Shipping Price</p>
+                  <span className="font-medium">৳{order.shippingPrice}</span>
+                </div>
           </div>
 
           {/* Total */}
