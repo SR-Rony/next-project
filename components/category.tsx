@@ -3,6 +3,8 @@
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import watch from "@/public/category/watch.jpeg"
+import Image from "next/image";
 
 type Category = {
   name: string
@@ -36,17 +38,19 @@ export default function Category() {
         <p className="text-gray-500">Browse products by category</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
         {categories.map((category) => (
           <Link
             key={category.slug}
             // href={`/shop/${category.slug}`}
             href={`/shop`}
-            className="group bg-white border border-gray-200 rounded-lg p-4 text-center shadow-sm hover:shadow-md hover:border-primary transition-all duration-200"
+            className=" group  lg:w-40 lg:h-40 lg:p-4 rounded-full mx-auto shadow-sm border-3 border-primary overflow-hidden"
           >
-            <span className="text-sm sm:text-base font-medium text-gray-800 group-hover:text-primary transition-colors">
-              {category.name}
-            </span>
+            <Image
+              src={watch}
+              alt={"category"}
+              className="object-cover w-full h-full p-2 group-hover:scale-107 duration-300"
+            />
           </Link>
         ))}
       </div>

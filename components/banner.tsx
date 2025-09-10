@@ -1,79 +1,104 @@
-"use client"
+"use client";
 
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import banner from "@/public/banner/banner.jpg";
+import banner4 from "@/public/banner/banner4.jpg";
+import banner2 from "@/public/banner/banner3.jpg";
 
-import { useState, useEffect } from "react"
-import watch from "@/public/banner/watch.jpg"
-import banner3 from "@/public/banner/banner3.jpg"
-import headphon from "@/public/banner/headphon.jpg"
-import banner from "@/public/banner/banner.jpg"
-import Image from "next/image"
-import Link from "next/link"
-
-const banners = [
+const slides = [
   {
     id: 1,
-    title: "Mega Electronics Sale",
-    subtitle: "Up to 70% off on gadgets and tech gear!",
-    image: banner// Adjust the path as needed
+    title: "Fresh & Organic Vegetables",
+    subtitle: "Direct from village farms to your home.",
+    image: banner,
   },
   {
     id: 2,
-    title: "Style Your Summer",
-    subtitle: "New arrivals in fashion & accessories",
-    image: headphon
+    title: "Farm Fresh Eggs & Chicken",
+    subtitle: "Healthy, organic, and chemical-free.",
+    image: banner2,
   },
   {
     id: 3,
-    title: "Furniture Festival",
-    subtitle: "Upgrade your home with 2025 trends",
-    image: watch
+    title: "Fresh Fish & Dairy Products",
+    subtitle: "Delivered with love from Greenvillage.",
+    image: banner4,
   },
-  {
-    id: 4,
-    title: "Furniture Festival",
-    subtitle: "Upgrade your home with 2025 trends",
-    image: banner3
-  },
-]
+];
 
-export default function Banner() {
-  const [current, setCurrent] = useState(0)
-
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % banners.length)
-  }
-
-  useEffect(() => {
-    const timer = setInterval(nextSlide, 5000)
-    return () => clearInterval(timer)
-  }, [])
-
+export default function BannerSlider() {
   return (
-    <div className="w-full bg-muted mt-3">
-      <div className="container mx-auto relative w-full h-[300px] md:h-[500px] overflow-hidden">
-        {banners.map((slide, idx) => (
-          <div
-            key={slide.id}
-            className={`absolute top-0 left-0 bg-black w-full h-full transition-opacity duration-1000 ${
-              idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
-          >
-            <Image
-            src={slide.image}
-            alt={slide.title}
-            className="w-full h-full object-cover"
-            priority
-            />
-            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6 md:px-20 text-white">
-              <h2 className="text-2xl md:text-5xl font-bold">{slide.title}</h2>
-              <p className="text-sm md:text-lg mt-2">{slide.subtitle}</p>
-              <Link href={"/shop"} className="mt-4 inli inline-block text-center bg-primary text-black hover:bg-hover_color cursor-pointer rounded-lg py-2">
-                Shop Now
-              </Link>
+    <section className="w-full relative">
+      <Swiper
+        modules={[Autoplay, Pagination, Navigation]}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        navigation={true}
+        loop={true}
+        className="w-full h-[300px] md:h-[500px] lg:h-[600px] overflow-hidden"
+      >
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.id}>
+            <div className="relative w-full h-full">
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                priority
+                className="object-cover"
+              />
+              {/* Dark overlay */}
+              <div className="absolute inset-0 bg-black/40"></div>
+
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
+                  {slide.title}
+                </h2>
+                <p className="mt-3 text-sm md:text-lg text-gray-200 drop-shadow">
+                  {slide.subtitle}
+                </p>
+              </div>
             </div>
-          </div>
+          </SwiperSlide>
         ))}
-      </div>
-    </div>
-  )
+      </Swiper>
+
+      {/* ✅ Swiper custom styles */}
+      <style jsx global>{`
+        /* Arrows */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #FDC700; /* Green-600 */
+            transition: color 0.3s;
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            color: #FDC700; /* Darker Green */
+        }
+
+        /* Hide arrows on small screens */
+        @media (max-width: 767px) {
+            .swiper-button-next,
+            .swiper-button-prev {
+            display: none;
+            }
+        }
+
+        /* Pagination dots */
+        .swiper-pagination-bullet {
+            background: #d1d5db; /* Gray-300 default */
+            opacity: 1;
+        }
+        .swiper-pagination-bullet-active {
+            background: #FDC700; /* Green-600 */
+        }
+        `}</style>
+    </section>
+  );
 }

@@ -49,7 +49,7 @@ export default function ProductItem({ product }: ProductProps) {
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden border">
+    <div className="group relative bg-white rounded-sm shadow-md hover:shadow-xl transition-all overflow-hidden border">
       {/* Popular Badge */}
       {product.isPopular && (
         <div className="absolute top-2 left-2 bg-yellow-400 text-xs font-semibold px-2 py-1 rounded z-10">
@@ -59,7 +59,7 @@ export default function ProductItem({ product }: ProductProps) {
 
       {/* Image with Link */}
       <Link href={`/product/${product.slug}`} passHref>
-        <div className="relative w-full h-60 cursor-pointer">
+        <div className="relative w-full h-80 cursor-pointer">
           <Image
             src={product.image}
             alt={product.name}

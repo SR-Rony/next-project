@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useAppDispatch, useAppSelector } from "../redux/hook/hook"
 import { Button } from "@/components/ui/button"
 import { FaWhatsapp } from "react-icons/fa";
+import Link from "next/link"
 
 export default function CartPage() {
   const dispatch = useAppDispatch()
@@ -63,8 +64,12 @@ export default function CartPage() {
       <h1 className="text-3xl font-bold mb-8 text-center">🛒 Shopping Cart</h1>
 
       {cart.length === 0 ? (
-        <div className="text-center py-20 text-gray-500">
-          Your cart is empty. Start adding some products!
+        <div className="text-center py-20 text-gray-500 ">
+          <p className="mb-4">Your cart is empty. Start adding some products!</p>
+          <Link href={"/shop"}
+            className="text-primary hover:underline font-bold"
+          >Go To Shop
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-10">
