@@ -91,7 +91,7 @@ export default function Header() {
     <Link href="/cart" className="relative p-2 rounded-md hover:bg-white/10">
       <ShoppingCart className="w-6 h-6" />
       {hasMounted && cart.length > 0 && (
-        <span className="absolute -top-1 -right-2 text-xs bg-primary text-black rounded-full px-1 font-semibold">
+        <span className="absolute top-0 right-0 text-xs bg-primary text-black rounded-full px-1 font-semibold">
           {cart.length}
         </span>
       )}

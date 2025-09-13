@@ -20,6 +20,7 @@ export default function DashboardNavbar() {
     { name: "Categorys", href: "/dashboard/categorys" },
     { name: "Products", href: "/dashboard/products" },
     { name: "Customers", href: "/dashboard/customers" },
+    { name: "Coupon", href: "/dashboard/coupon" },
   ];
 
   const notificationCount = 3; // replace with Redux data later
