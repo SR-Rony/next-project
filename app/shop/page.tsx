@@ -1,97 +1,102 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Slider } from "@/components/ui/slider"
-import Image from "next/image"
-import Link from "next/link"
-import { useAppDispatch } from "../redux/hook/hook"
-import { addToCart } from "../redux/features/cartSlice"
-import { toast } from "sonner"
-
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import Image from "next/image";
+import Link from "next/link";
+import { useAppDispatch } from "../redux/hook/hook";
+import { addToCart } from "../redux/features/cartSlice";
+import { toast } from "sonner";
+import axiosInstance from "@/lib/axiosInstance";
 
 type CategoryType = {
-  _id: string
-  name: string
-}
+  _id: string;
+  name: string;
+};
 
 type Product = {
-  _id: string
-  name: string
-  slug: string
-  price: number
-  image: string
-  categoryId: CategoryType
-  quantity?: number   // ✅ added this so product.quantity works
-}
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  image: string;
+  categoryId: CategoryType;
+  quantity?: number;
+};
 
 export default function ShopPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
-  const [minPrice, setMinPrice] = useState<number>(0)
-  const [maxPrice, setMaxPrice] = useState<number>(1000)
-  const [searchQuery, setSearchQuery] = useState<string>("")
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [categories, setCategories] = useState<CategoryType[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const dispatch = useAppDispatch()
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const dispatch = useAppDispatch();
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${baseUrl}/product`)
-      const data = await res.json()
-      const allProducts: Product[] = data.payload.products
+      const { data } = await axiosInstance.get("/product"); // ✅ axiosInstance ব্যবহার
+      const allProducts: Product[] = data.payload.products;
 
-      // Price range
-      const prices = allProducts.map((p) => p.price)
-      const min = Math.min(...prices)
-      const max = Math.max(...prices)
+      if (!allProducts || allProducts.length === 0) {
+        setProducts([]);
+        setFilteredProducts([]);
+        return;
+      }
 
-      setProducts(allProducts)
-      setMinPrice(min)
-      setMaxPrice(max)
-      setPriceRange([min, max])
+      // 🔹 Calculate price range
+      const prices = allProducts.map((p) => p.price);
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
 
-      // Unique categories
-      const categoryMap = new Map<string, CategoryType>()
+      setProducts(allProducts);
+      setMinPrice(min);
+      setMaxPrice(max);
+      setPriceRange([min, max]);
+
+      // 🔹 Extract unique categories
+      const categoryMap = new Map<string, CategoryType>();
       allProducts.forEach((p) => {
-        if (!categoryMap.has(p.categoryId._id)) {
-          categoryMap.set(p.categoryId._id, p.categoryId)
+        if (p.categoryId && !categoryMap.has(p.categoryId._id)) {
+          categoryMap.set(p.categoryId._id, p.categoryId);
         }
-      })
-      setCategories(Array.from(categoryMap.values()))
+      });
+      setCategories(Array.from(categoryMap.values()));
     } catch (err) {
-      console.error("Failed to load data:", err)
+      console.error("Failed to load products:", err);
+      toast.error("❌ Failed to load products");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const filtered = products.filter((p) => {
-      const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1]
-      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
-        selectedCategories.length === 0 || selectedCategories.includes(p.categoryId._id)
-      return matchesPrice && matchesSearch && matchesCategory
-    })
-    setFilteredProducts(filtered)
-  }, [products, priceRange, searchQuery, selectedCategories])
+        selectedCategories.length === 0 || selectedCategories.includes(p.categoryId._id);
+      return matchesPrice && matchesSearch && matchesCategory;
+    });
+    setFilteredProducts(filtered);
+  }, [products, priceRange, searchQuery, selectedCategories]);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
         ? prev.filter((c) => c !== categoryId)
         : [...prev, categoryId]
-    )
-  }
+    );
+  };
 
   const handleAddToCart = (product: Product) => {
     dispatch(
@@ -102,9 +107,9 @@ export default function ShopPage() {
         price: product.price,
         qty: 1,
       })
-    )
-    toast.success(`🛒 ${product.name} added to cart`)
-  }
+    );
+    toast.success(`🛒 ${product.name} added to cart`);
+  };
 
   return (
     <div className="bg-gray-100 py-8 min-h-screen">
@@ -135,9 +140,7 @@ export default function ShopPage() {
                 step={1}
                 value={priceRange}
                 onValueChange={(value: number[]) => {
-                  if (value.length === 2) {
-                    setPriceRange([value[0], value[1]])
-                  }
+                  if (value.length === 2) setPriceRange([value[0], value[1]]);
                 }}
               />
               <div className="mt-2 text-sm text-gray-600">
@@ -210,5 +213,5 @@ export default function ShopPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

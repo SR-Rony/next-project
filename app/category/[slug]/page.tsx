@@ -1,4 +1,3 @@
-// app/category/[slug]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+import axiosInstance from "@/lib/axiosInstance"; // ✅ use axiosInstance
 
 type ProductType = {
   _id: string;
@@ -21,16 +19,26 @@ export default function CategoryPage() {
   const { slug } = useParams();
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categoryName, setCategoryName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`${baseUrl}/product/category/${slug}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data.payload.products || []);
-        setCategoryName(data.payload.categoryName || slug);
-      })
-      .catch((err) => console.error(err));
+
+    const fetchCategoryProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get(`/product/category/${slug}`);
+        const data = res.data?.payload;
+        setProducts(data?.products || []);
+        setCategoryName(data?.categoryName || String(slug));
+      } catch (error) {
+        console.error("❌ Failed to fetch category products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoryProducts();
   }, [slug]);
 
   return (
@@ -38,11 +46,13 @@ export default function CategoryPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-semibold capitalize">
-            {categoryName} Products
+            {loading ? "Loading..." : `${categoryName} Products`}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {products.length > 0 ? (
+          {loading ? (
+            <p className="text-center text-gray-500">Loading products...</p>
+          ) : products.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {products.map((product) => (
                 <Card
@@ -60,7 +70,7 @@ export default function CategoryPage() {
                     <h3 className="mt-3 text-lg font-medium text-center">
                       {product.name}
                     </h3>
-                    <p className="text-gray-600">${product.price}</p>
+                    <p className="text-gray-600">৳{product.price}</p>
                     <Link href={`/product/${product._id}`} className="w-full">
                       <Button className="w-full mt-3">View Details</Button>
                     </Link>
@@ -69,7 +79,9 @@ export default function CategoryPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500">No products found in this category.</p>
+            <p className="text-center text-gray-500">
+              No products found in this category.
+            </p>
           )}
         </CardContent>
       </Card>

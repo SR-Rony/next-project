@@ -1,6 +1,5 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useAppSelector, useAppDispatch } from "@/app/redux/hook/hook";
 import { UserType } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -9,6 +8,7 @@ import { LogOut, Package, Heart, MapPin } from "lucide-react";
 import { logout } from "@/app/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import axiosInstance from "@/lib/axiosInstance";
 
 export default function Sidebar() {
   const router = useRouter();
@@ -17,10 +17,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${baseUrl}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
       dispatch(logout());
       toast.success("Logged out successfully!");
       router.push("/user/login");
@@ -41,11 +38,11 @@ export default function Sidebar() {
       {/* User Info */}
       <div className="flex flex-col items-center mb-8">
         <Avatar className="w-20 h-20 border-4 border-primary shadow-sm">
-          <AvatarImage src={'img'} />
+          <AvatarImage src={"img"} />
           <AvatarFallback>{user?.name?.[0] || "?"}</AvatarFallback>
         </Avatar>
         <h2 className="mt-3 font-semibold text-lg">{user?.name || "Guest"}</h2>
-        <p className="text-sm text-gray-500">{user?.email || "No email"}</p>
+        <p className="text-sm text-gray-500">{user?.phone || "No phone"}</p>
       </div>
 
       {/* Navigation */}

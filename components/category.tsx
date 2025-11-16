@@ -1,10 +1,10 @@
 "use client"
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import watch from "@/public/category/watch.jpeg"
-import Image from "next/image";
+import axiosInstance from "@/lib/axiosInstance"
 
 type Category = {
   name: string
@@ -17,9 +17,8 @@ export default function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${baseUrl}/category`)
-        const data = await res.json()
-        setCategories(data.payload)
+        const res = await axiosInstance.get<{ payload: Category[] }>("/category")
+        setCategories(res.data.payload)
       } catch (error) {
         console.error("Failed to load categories", error)
       }
@@ -27,7 +26,6 @@ export default function Category() {
 
     fetchCategories()
   }, [])
-  
 
   return (
     <section className="container mx-auto py-12 px-4">
@@ -42,13 +40,12 @@ export default function Category() {
         {categories.map((category) => (
           <Link
             key={category.slug}
-            // href={`/shop/${category.slug}`}
             href={`/shop`}
-            className=" group  lg:w-40 lg:h-40 lg:p-4 rounded-full mx-auto shadow-sm border-3 border-primary overflow-hidden"
+            className="group lg:w-40 lg:h-40 lg:p-4 rounded-full mx-auto shadow-sm border-3 border-primary overflow-hidden"
           >
             <Image
               src={watch}
-              alt={"category"}
+              alt={category.name}
               className="object-cover w-full h-full p-2 group-hover:scale-107 duration-300"
             />
           </Link>

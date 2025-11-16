@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Home, Printer } from "lucide-react";
 import Image from "next/image";
+import axiosInstance from "@/lib/axiosInstance";
 
 // ---------- Types ----------
 type OrderItem = {
@@ -36,10 +37,8 @@ type OrderType = {
   createdAt: string;
   isPaid: boolean;
   isDelivered: boolean;
-  shippingPrice :number
+  shippingPrice: number;
 };
-
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // ---------- Component ----------
 export default function OrderSuccessPage() {
@@ -47,25 +46,24 @@ export default function OrderSuccessPage() {
   const [order, setOrder] = useState<OrderType | null>(null);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     if (!orderId) return;
-    setLoading(true);
 
-    fetch(`${baseUrl}/orders/${orderId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setOrder(data);
+    const fetchOrder = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axiosInstance.get(`/orders/${orderId}`);
+        setOrder(data); // assuming your API returns order data directly
         console.log(data);
-        
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching order:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchOrder();
   }, [orderId]);
-  
 
   if (loading) {
     return (
@@ -86,6 +84,7 @@ export default function OrderSuccessPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <Card className="max-w-3xl mx-auto shadow-lg rounded-2xl border border-gray-200">
+        {/* Header */}
         <CardHeader className="text-center border-b pb-6">
           <CardTitle className="text-2xl md:text-3xl font-bold text-green-600">
             🎉 Order Placed Successfully!
@@ -96,7 +95,7 @@ export default function OrderSuccessPage() {
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
-          {/* Order Info */}
+          {/* Customer & Order Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
             <div className="flex justify-between">
               <span className="font-semibold">Customer:</span>
@@ -156,21 +155,19 @@ export default function OrderSuccessPage() {
                       {product.name} × {product.qty}
                     </span>
                   </div>
-                  {/* ✅ changed $ to ৳ */}
                   <span className="font-medium">৳{product.price * product.qty}</span>
                 </div>
               ))}
+              <div className="flex justify-between items-center mt-3 px-3">
+                <p>Shipping Price</p>
+                <span className="font-medium">৳{order.shippingPrice}</span>
+              </div>
             </div>
-                <div className="flex justify-between items-center mt-9 px-3">
-                  <p>Shipping Price</p>
-                  <span className="font-medium">৳{order.shippingPrice}</span>
-                </div>
           </div>
 
           {/* Total */}
           <div className="flex justify-between text-lg font-bold pt-4 border-t">
             <span>Total:</span>
-            {/* ✅ changed $ to ৳ */}
             <span>৳{order.totalPrice.toFixed(2)}</span>
           </div>
 

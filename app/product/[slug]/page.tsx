@@ -1,12 +1,20 @@
-// import ProductDetailsClient from "./ProductDetailsClient";
-
 import ProductDetailsClient from "@/components/productDetails";
+import axiosInstance from "@/lib/axiosInstance";
 
-
-// ✅ Tell Next.js this page is dynamic
 export const dynamic = "force-dynamic";
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface ProductType {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  quantity: number;
+  sold: number;
+}
+
+// Use `params` as destructured directly
 export default async function ProductDetailsPage({
   params,
 }: {
@@ -14,17 +22,16 @@ export default async function ProductDetailsPage({
 }) {
   const { slug } = await params;
 
-  const res = await fetch(`${baseUrl}/product/${slug}`, {
-    cache: "no-store",
-  });
+  try {
+    const res = await axiosInstance.get(`/product/${slug}`, {
+      withCredentials: true,
+    });
 
-  if (!res.ok) throw new Error("Failed to fetch product");
+    const product: ProductType = res.data.payload;
 
-  const data = await res.json();
-  const product = data.payload;
-  
-  
-
-  // Pass product to client component
-  return <ProductDetailsClient product={product} />;
+    return <ProductDetailsClient product={product} />;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Product not found or server error.");
+  }
 }

@@ -1,9 +1,9 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useEffect, useState } from "react";
 import ProductItem from "./ProductItem";
 import { Loader2 } from "lucide-react";
+import axiosInstance from "@/lib/axiosInstance"; // ✅ import
 
 interface ProductType {
   _id: string;
@@ -14,6 +14,12 @@ interface ProductType {
   image: string;
 }
 
+interface ProductResponse {
+  payload: {
+    products: ProductType[];
+  };
+}
+
 export default function Product() {
   const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,11 +28,10 @@ export default function Product() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${baseUrl}/product`);
-        if (!res.ok) throw new Error("Failed to load products");
-        const data = await res.json();
-        setProducts(data.payload.products); // adjust if your response shape is different
+        const res = await axiosInstance.get<ProductResponse>("/product");
+        setProducts(res.data.payload.products);
       } catch (err) {
+        console.error("Failed to load products:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);

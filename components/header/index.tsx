@@ -1,36 +1,38 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Menu, ShoppingCart, User } from "lucide-react"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import SearchBar from "./searchBar"
-import { useAppDispatch, useAppSelector } from "@/app/redux/hook/hook"
-import { setCart } from "@/app/redux/features/cartSlice"
-import { useHasMounted } from "@/app/redux/hook/mounted"
+import Link from "next/link";
+import { Menu, ShoppingCart, User } from "lucide-react";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import SearchBar from "./searchBar";
+import { useAppDispatch, useAppSelector } from "@/app/redux/hook/hook";
+import { useHasMounted } from "@/app/redux/hook/mounted";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
-import { logout } from "@/app/redux/features/authSlice"
-import { UserType } from "@/types/user"
-import MobileBottomMenu from "./menu"
-import SiteMenu from "./siteMenu"
+} from "@/components/ui/dropdown-menu";
+import { logout } from "@/app/redux/features/authSlice";
+import { UserType } from "@/types/user";
+import MobileBottomMenu from "./menu";
+import SiteMenu from "./siteMenu";
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const dispatch = useAppDispatch()
-  const router = useRouter()
-  const hasMounted = useHasMounted()
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const hasMounted = useHasMounted();
 
-  const cart = useAppSelector((state) => state.cart|| [])
+  // FIXED — correct cart state read
+  const cartItems = useAppSelector((state) => state.cart.items);
+
+  // FIXED — user state
+  const user: UserType | null = useAppSelector((state) => state.user.user);
   
-  const user: UserType | null = useAppSelector((state) => state.user.user)
-  const userName = user?.name?.slice(0, 2).toUpperCase() || "GU"
+  const userName = user?.name?.slice(0, 2).toUpperCase() || "GU";
 
   const menuItems = [
     { name: "Home", href: "/" },
@@ -38,19 +40,14 @@ export default function Header() {
     { name: "Services", href: "/services" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-  ]
-
-  useEffect(() => {
-    const cartFromStorage = JSON.parse(localStorage.getItem("cart") || "[]")
-    dispatch(setCart(cartFromStorage))
-  }, [dispatch])
+  ];
 
   const handleLogout = () => {
     if (confirm("Are you sure you want to logout?")) {
-      dispatch(logout())
-      router.push("/user/login")
+      dispatch(logout());
+      router.push("/user/login");
     }
-  }
+  };
 
   const renderUserMenu = () =>
     !user ? (
@@ -71,13 +68,15 @@ export default function Header() {
               Profile
             </Link>
           </DropdownMenuItem>
-          {user?.isAdmin && (
+
+          {user?.role && (
             <DropdownMenuItem>
               <Link href="/dashboard" className="w-full">
                 Dashboard
               </Link>
             </DropdownMenuItem>
           )}
+
           <DropdownMenuItem asChild>
             <button onClick={handleLogout} className="w-full text-left">
               Logout
@@ -85,18 +84,20 @@ export default function Header() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    )
+    );
 
   const renderCartIcon = () => (
     <Link href="/cart" className="relative p-2 rounded-md hover:bg-white/10">
       <ShoppingCart className="w-6 h-6" />
-      {hasMounted && cart.length > 0 && (
+
+      {/* FIXED — correct cart count */}
+      {hasMounted && cartItems.length > 0 && (
         <span className="absolute top-0 right-0 text-xs bg-primary text-black rounded-full px-1 font-semibold">
-          {cart.length}
+          {cartItems.length}
         </span>
       )}
     </Link>
-  )
+  );
 
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#131921] via-[#1f2a38] to-[#131921] text-white shadow-md">
@@ -104,32 +105,33 @@ export default function Header() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 md:px-0">
           {/* Left Section */}
           <div className="flex items-center justify-between w-full md:w-auto">
-            {/* Mobile Menu */}
             <div className="flex gap-2">
+              {/* Mobile Menu */}
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10"
-                >
-                  <Menu className="w-6 h-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-4 bg-[#1f2a38] text-white">
-                <nav className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-4rem)]">
-                  <SiteMenu/>
-                </nav>
-              </SheetContent>
-            </Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/10"
+                  >
+                    <Menu className="w-6 h-6" />
+                  </Button>
+                </SheetTrigger>
 
-            {/* Logo */}
-            <Link
-              href="/"
-              className="text-2xl font-extrabold text-primary hover:text-primary/80"
-            >
-              Azpero
-            </Link>
+                <SheetContent side="left" className="w-64 p-4 bg-[#1f2a38] text-white">
+                  <nav className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-4rem)]">
+                    <SiteMenu />
+                  </nav>
+                </SheetContent>
+              </Sheet>
+
+              {/* Logo */}
+              <Link
+                href="/"
+                className="text-2xl font-extrabold text-primary hover:text-primary/80"
+              >
+                Azpero
+              </Link>
             </div>
 
             {/* Mobile Icons */}
@@ -166,5 +168,5 @@ export default function Header() {
       {/* Mobile Bottom Menu */}
       <MobileBottomMenu />
     </header>
-  )
+  );
 }

@@ -1,63 +1,72 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { setCart, removeFromCart } from "@/app/redux/features/cartSlice"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useAppDispatch, useAppSelector } from "../redux/hook/hook"
-import { Button } from "@/components/ui/button"
+import { useEffect } from "react";
+import { setCart, removeFromCart } from "@/app/redux/features/cartSlice";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "../redux/hook/hook";
+import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
-import Link from "next/link"
+import Link from "next/link";
 
 export default function CartPage() {
-  const dispatch = useAppDispatch()
-  const router = useRouter()
-  const cart = useAppSelector((state) => state.cart || [])
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  const phoneNumber = "01743493707"; // Your number
+  // ✅ Correct way: our cartSlice contains items array
+  const cart = useAppSelector((state) => state.cart.items || []);
 
-  // Load cart from localStorage on mount
+  const phoneNumber = "01743493707";
+
+  // Load cart from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "[]")
-      dispatch(setCart(storedCart))
+      const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      dispatch(setCart(storedCart));
     }
-  }, [dispatch])
+  }, [dispatch]);
 
-  // Remove item from cart
+  // Remove item
   const handleRemove = (id: string) => {
-    dispatch(removeFromCart(id))
-  }
-
-  // Update item quantity
-  const updateQuantity = (id: string, newQty: number) => {
-    if (newQty < 1) return
-    const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, qty: newQty } : item
-    )
-    localStorage.setItem("cart", JSON.stringify(updatedCart))
-    dispatch(setCart(updatedCart))
-  }
-
-  // Proceed to checkout
-  const handleCheckout = () => {
-    if (cart.length === 0) {
-      alert("Your cart is empty!")
-      return
-    }
-    localStorage.setItem("checkoutData", JSON.stringify(cart))
-    router.push("/checkout")
-  }
-
-  const handleWhatsApp = () => {
-    const url = `https://wa.me/${phoneNumber}`;
-    window.open(url, "_blank"); // Open WhatsApp in new tab
+    dispatch(removeFromCart(id));
   };
 
-  // --- PRICES ---
-  const shippingCost = 120 // Flat shipping charge in Taka
-  const subtotal = cart.reduce((sum, item) => sum + Number(item.price || 0) * (item.qty || 1), 0)
-  const total = subtotal + (cart.length > 0 ? shippingCost : 0)
+  // Update quantity
+  const updateQuantity = (id: string, newQty: number) => {
+    if (newQty < 1) return;
+
+    const updatedCart = cart.map((item) =>
+      item.id === id ? { ...item, qty: newQty } : item
+    );
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    dispatch(setCart(updatedCart));
+  };
+
+  // Checkout
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    localStorage.setItem("checkoutData", JSON.stringify(cart));
+    router.push("/checkout");
+  };
+
+  // WhatsApp
+  const handleWhatsApp = () => {
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank");
+  };
+
+  // Prices
+  const shippingCost = 120;
+  const subtotal = cart.reduce(
+    (sum, item) => sum + Number(item.price || 0) * (item.qty || 1),
+    0
+  );
+  const total = subtotal + (cart.length > 0 ? shippingCost : 0);
 
   return (
     <div className="container mx-auto px-4 mt-16 max-w-7xl">
@@ -66,16 +75,18 @@ export default function CartPage() {
       {cart.length === 0 ? (
         <div className="text-center py-20 text-gray-500 ">
           <p className="mb-4">Your cart is empty. Start adding some products!</p>
-          <Link href={"/shop"}
+          <Link
+            href={"/shop"}
             className="text-primary hover:underline font-bold"
-          >Go To Shop
+          >
+            Go To Shop
           </Link>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* Cart Items List */}
+          {/* Cart Items */}
           <div className="flex-1 space-y-6">
-            {/* Header Row */}
+            {/* Header */}
             <div className="hidden sm:flex items-center bg-gray-100 p-3 rounded-t-lg font-semibold text-gray-700 gap-4">
               <div className="w-20">Image</div>
               <div className="w-48">Product Name</div>
@@ -85,39 +96,37 @@ export default function CartPage() {
               <div className="w-24"></div>
             </div>
 
-            {/* Cart Items */}
             {cart.map((item) => (
               <div
                 key={item.id}
                 className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-b-lg shadow"
               >
-                {/* Product Image */}
+                {/* Image */}
                 <div className="relative w-full sm:w-20 h-40 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
                     style={{ objectFit: "cover" }}
-                    sizes="(max-width: 640px) 100vw, 80px"
                   />
                 </div>
 
-                {/* Product Name */}
+                {/* Name */}
                 <h2 className="w-full sm:w-48 text-lg font-semibold truncate max-w-xs mt-2 sm:mt-0">
                   {item.name}
                 </h2>
 
-                {/* Product Price */}
-                <p className="w-full sm:w-28 text-center text-gray-700 font-semibold mt-2 sm:mt-0">
+                {/* Price */}
+                <p className="w-full sm:w-28 text-center text-gray-700 font-semibold">
                   ৳{Number(item.price || 0).toFixed(2)}
                 </p>
 
-                {/* Quantity Controls */}
-                <div className="w-full sm:w-32 flex items-center justify-center gap-2 mt-2 sm:mt-0">
+                {/* Quantity */}
+                <div className="w-full sm:w-32 flex items-center justify-center gap-2">
                   <button
                     onClick={() => updateQuantity(item.id, item.qty - 1)}
                     disabled={item.qty === 1}
-                    className={`w-8 h-8 flex items-center justify-center border rounded ${
+                    className={`w-8 h-8 border rounded ${
                       item.qty === 1
                         ? "bg-gray-100 cursor-not-allowed"
                         : "hover:bg-gray-200"
@@ -125,24 +134,26 @@ export default function CartPage() {
                   >
                     −
                   </button>
+
                   <span className="w-6 text-center">{item.qty}</span>
+
                   <button
                     onClick={() => updateQuantity(item.id, item.qty + 1)}
-                    className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-200"
+                    className="w-8 h-8 border rounded hover:bg-gray-200"
                   >
                     +
                   </button>
                 </div>
 
-                {/* Total Price */}
-                <p className="w-full sm:w-24 text-right text-lg font-bold mt-2 sm:mt-0">
-                  ৳{(Number(item.price || 0) * (item.qty || 1)).toFixed(2)}
+                {/* Total price */}
+                <p className="w-full sm:w-24 text-right text-lg font-bold">
+                  ৳{(item.price * item.qty).toFixed(2)}
                 </p>
 
-                {/* Remove Button */}
+                {/* Remove */}
                 <button
                   onClick={() => handleRemove(item.id)}
-                  className="w-full sm:w-24 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition mt-2 sm:mt-0"
+                  className="w-full sm:w-24 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                 >
                   Remove
                 </button>
@@ -150,18 +161,18 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* Order Summary */}
-          <aside className="w-full lg:w-96 bg-white p-6 rounded-lg shadow mt-10 lg:mt-0">
+          {/* Summary */}
+          <aside className="w-full lg:w-96 bg-white p-6 rounded-lg shadow">
             <h3 className="text-xl font-bold mb-6">Order Summary</h3>
 
             <div className="flex justify-between mb-4">
-              <span className="text-gray-700 font-medium">Subtotal</span>
+              <span className="font-medium">Subtotal</span>
               <span className="font-semibold">৳{subtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between mb-4 text-gray-500">
               <span>Shipping</span>
-              <span>৳{shippingCost.toFixed(2)}</span>
+              <span>৳{shippingCost}</span>
             </div>
 
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
@@ -171,24 +182,21 @@ export default function CartPage() {
 
             <Button
               onClick={handleCheckout}
-              className="mt-8 w-full bg-primary hover:bg-hover_color text-white py-5 rounded-lg font-semibold transition cursor-pointer"
+              className="mt-8 w-full bg-primary hover:bg-hover_color text-white py-5 rounded-lg font-semibold"
             >
               Proceed to Checkout
             </Button>
-             <Button
+
+            <Button
               onClick={handleWhatsApp}
-              className="mt-8 w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-lg font-semibold flex items-center justify-center gap-2 cursor-pointer"
+              className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-lg font-semibold flex items-center justify-center gap-2"
             >
-              {/* Animated WhatsApp Icon */}
-              <FaWhatsapp
-                size={22}
-                className="animate-bounce text-white"
-              />
+              <FaWhatsapp size={22} className="animate-bounce" />
               {phoneNumber}
             </Button>
           </aside>
         </div>
       )}
     </div>
-  )
+  );
 }

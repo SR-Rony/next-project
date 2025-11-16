@@ -1,6 +1,5 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,84 +18,88 @@ import { setUser } from "@/app/redux/features/authSlice";
 import { useAppDispatch } from "../../redux/hook/hook";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import axiosInstance from "@/lib/axiosInstance";
+import { AxiosError } from "axios";
+import type { UserType } from "@/types/user";
 
+
+// ========================
+// 🔹 Type Definitions
+// ========================
+interface LoginResponse {
+  statusCode: number;
+  message: string;
+  payload?: {
+    user: UserType;
+  };
+}
+
+// ========================
+// 🔹 Component
+// ========================
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch(`${baseUrl}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // ✅ keep if you also set HttpOnly refresh token
-      });
+      const res = await axiosInstance.post<LoginResponse>(
+        "/auth/login",
+        { phone, password },
+        { withCredentials: true }
+      );
+      const data = res.data;
 
-      const data = await res.json();
+      console.log("User data:", data);
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      } else {
+      if (data.statusCode === 200 && data.payload?.user) {
         toast.success("Login successful!");
-      }
-
-      // ✅ Save user and token in localStorage + Redux
-      if (data.payload?.user && data.payload?.accessToken) {
         localStorage.setItem("user", JSON.stringify(data.payload.user));
-        localStorage.setItem("accessToken", data.payload.accessToken); // 🔑 store token
         dispatch(setUser(data.payload.user));
-      }
-
-      // ✅ Redirect after login
-      setTimeout(() => {
         router.push("/");
-      }, 500);
-
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
       } else {
-        setError("An unknown error occurred");
+        setError(data.message || "Invalid credentials");
       }
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      console.error("Login error:", error);
+      setError(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#1f2937] to-[#111827] px-4">
       <Card className="w-full max-w-sm shadow-xl border-none bg-white">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Login to your account</CardTitle>
-          <CardDescription>Enter your email below to log in</CardDescription>
+          <CardDescription>Enter your phone number and password</CardDescription>
         </CardHeader>
 
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="phone">Phone Number</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
+                id="phone"
+                type="text"
+                placeholder="e.g. 017XXXXXXXX"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
+
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>

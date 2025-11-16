@@ -1,8 +1,9 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/axiosInstance";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Edit, Trash, Plus } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 type ProductType = {
   _id: string;
@@ -24,7 +32,7 @@ type ProductType = {
   price: number;
   quantity: number;
   image: string;
-  slug :string
+  slug: string;
 };
 
 export default function ProductsPage() {
@@ -32,60 +40,101 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<ProductType[]>([]);
   const [open, setOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
+    null
+  );
+
+  // =======================
+  // Load Products (With Cookie)
+  // =======================
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosInstance.get("/product");
+      setProducts(res.data.payload.products || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load products");
+    }
+  };
 
   useEffect(() => {
-    fetch(`${baseUrl}/product`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data.payload.products))
-      .catch((err) => console.error(err));
+    fetchProducts();
   }, []);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // =======================
+  // Delete Product
+  // =======================
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    await fetch(`${baseUrl}/product/${id}`, { method: "DELETE" });
-    setProducts((prev) => prev.filter((p) => p._id !== id));
+
+    try {
+      await axiosInstance.delete(`/product/${id}`);
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+      toast.success("Product deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete product");
+    }
   };
 
+  // =======================
+  // Edit Product Modal
+  // =======================
   const handleEdit = (product: ProductType) => {
     setSelectedProduct(product);
     setOpen(true);
   };
 
+  // =======================
+  // Update Product (PUT)
+  // =======================
   const handleUpdate = async () => {
     if (!selectedProduct) return;
 
-    const res = await fetch(`${baseUrl}/product/${selectedProduct.slug}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selectedProduct),
-    });
-      
-    if (res.ok) {
-      
-      setProducts((prev) =>
-        prev.map((p) => (p.slug === selectedProduct.slug ? selectedProduct : p))
+    try {
+      const res = await axiosInstance.put(
+        `/product/${selectedProduct.slug}`,
+        selectedProduct
       );
-      setOpen(false);
-    } else {
-      alert("Failed to update product");
+
+      if (res.status === 200) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.slug === selectedProduct.slug ? selectedProduct : p
+          )
+        );
+
+        toast.success("Product updated successfully");
+        setOpen(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update product");
     }
   };
 
+  // =======================
+  // UI Rendering
+  // =======================
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-22">
       <Card>
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <CardTitle className="text-lg sm:text-xl font-semibold">Products</CardTitle>
+          <CardTitle className="text-lg sm:text-xl font-semibold">
+            Products
+          </CardTitle>
+
           <Button onClick={() => router.push("/dashboard/products/add")}>
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
         </CardHeader>
+
         <CardContent>
+          {/* Search */}
           <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Input
               placeholder="Search products..."
@@ -94,6 +143,8 @@ export default function ProductsPage() {
               className="w-full sm:max-w-xs"
             />
           </div>
+
+          {/* Table */}
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -105,6 +156,7 @@ export default function ProductsPage() {
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
@@ -119,8 +171,11 @@ export default function ProductsPage() {
                         />
                       </TableCell>
                       <TableCell>{product.name}</TableCell>
-                      <TableCell>৳{Number(product.price).toLocaleString("en-BD")}</TableCell>
+                      <TableCell>
+                        ৳{Number(product.price).toLocaleString("en-BD")}
+                      </TableCell>
                       <TableCell>{product.quantity}</TableCell>
+
                       <TableCell className="text-right space-x-2">
                         <Button
                           variant="outline"
@@ -129,6 +184,7 @@ export default function ProductsPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
+
                         <Button
                           variant="destructive"
                           size="icon"
@@ -158,15 +214,20 @@ export default function ProductsPage() {
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
           </DialogHeader>
+
           {selectedProduct && (
             <div className="space-y-4">
               <Input
                 placeholder="Name"
                 value={selectedProduct.name}
                 onChange={(e) =>
-                  setSelectedProduct({ ...selectedProduct, name: e.target.value })
+                  setSelectedProduct({
+                    ...selectedProduct,
+                    name: e.target.value,
+                  })
                 }
               />
+
               <Input
                 placeholder="Price"
                 type="number"
@@ -178,6 +239,7 @@ export default function ProductsPage() {
                   })
                 }
               />
+
               <Input
                 placeholder="Quantity"
                 type="number"
@@ -191,6 +253,7 @@ export default function ProductsPage() {
               />
             </div>
           )}
+
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel

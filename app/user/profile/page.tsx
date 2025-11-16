@@ -1,15 +1,15 @@
 "use client"
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { logout, setUser } from "@/app/redux/features/authSlice"
 import { useAppDispatch, useAppSelector } from "@/app/redux/hook/hook"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { UserType } from "@/types/user"
+import type { UserType } from "@/types/user"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import axiosInstance from "@/lib/axiosInstance"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -20,7 +20,7 @@ export default function ProfilePage() {
   const [name, setName] = useState(user?.name || "")
   const [phone, setPhone] = useState(user?.phone || "")
 
-  // Redirect only on client side
+  // Redirect to login if user not found
   useEffect(() => {
     if (!user) {
       router.push("/user/login")
@@ -35,33 +35,29 @@ export default function ProfilePage() {
       router.push("/user/login")
     }
   }
-  
 
   const handleSave = async () => {
     if (!user?._id) return console.error("User ID is missing")
-      
+
     try {
-      const res = await fetch(`${baseUrl}/user/update/${user._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone }),
-        credentials: "include",
+      const res = await axiosInstance.put(`/user/update/${user._id}`, {
+        name,
+        phone,
       })
 
-      const data = await res.json()
-      
+      const data = res.data
 
-      if (!res.ok) {
+      if (!res.status.toString().startsWith("2")) {
         toast.error(data.message || "Profile update failed")
-        return  
-      }else{
-        toast.success("Profile updated successfully!")
+        return
       }
 
       dispatch(setUser(data.payload.user))
+      toast.success("Profile updated successfully!")
       setOpen(false)
     } catch (error) {
       console.error("Profile update failed:", error)
+      toast.error("Profile update failed")
     }
   }
 
@@ -72,7 +68,6 @@ export default function ProfilePage() {
         <div className="bg-white text-black p-6 rounded-lg shadow-md space-y-2">
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
-          <p><strong>Email:</strong> {user.email}</p>
 
           <div className="flex gap-4 mt-6 justify-center">
             <Dialog open={open} onOpenChange={setOpen}>
@@ -95,11 +90,6 @@ export default function ProfilePage() {
                     placeholder="Phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                  />
-                  <Input
-                    type="email"
-                    value={user.email}
-                    disabled
                   />
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

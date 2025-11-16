@@ -1,13 +1,25 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Trash, Plus } from "lucide-react";
 import { toast } from "sonner";
+import axiosInstance from "@/lib/axiosInstance";
 
 type CategoryType = {
   _id: string;
@@ -20,14 +32,14 @@ export default function CategoryPage() {
   const [newCategory, setNewCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch categories
+  // 🟢 Fetch Categories (axios)
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${baseUrl}/category`);
-      const data = await res.json();
-      setCategories(data.payload);
+      const res = await axiosInstance.get("/category");
+      setCategories(res.data?.payload || []);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load categories");
     }
   };
 
@@ -35,66 +47,48 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
-  // Add new category
+  // 🟢 Add New Category
   const handleAddCategory = async () => {
-    if (!newCategory.trim()) return alert("Please enter category name");
+    if (!newCategory.trim()) return toast.error("Please enter category name");
 
     setLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/category`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCategory }),
-      });
+      await axiosInstance.post("/category", { name: newCategory });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        alert(errData.message || "Failed to create category");
-        setLoading(false);
-        return;
-      }
-
+      toast.success("Category added successfully!");
       setNewCategory("");
+
       fetchCategories();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to create category");
     } finally {
       setLoading(false);
     }
   };
 
-  // Delete category
- const handleDelete = async (slug: string) => {
-  if (!confirm("Are you sure you want to delete this category?")) return;
+  // 🟢 Delete Category
+  const handleDelete = async (slug: string) => {
+    if (!confirm("Are you sure you want to delete this category?")) return;
 
-  try {
-    const res = await fetch(`${baseUrl}/category/${slug}`, {
-      method: "DELETE",
-    });
+    try {
+      await axiosInstance.delete(`/category/${slug}`);
 
-    if (!res.ok) {
+      toast.success("Category deleted");
+      fetchCategories();
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to delete category");
-      return;
     }
-
-    toast.success("Category deleted successfully");
-
-    // Refresh from backend
-    const updatedRes = await fetch(`${baseUrl}/category`);
-    const data = await updatedRes.json();
-
-    setCategories(data?.payload || []);
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong");
-  }
-};
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 mt-16">
       <Card className="shadow-md border border-gray-200">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b">
-          <CardTitle className="text-xl font-bold text-gray-800">Categories</CardTitle>
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Categories
+          </CardTitle>
 
           {/* Add Category Input */}
           <div className="flex gap-2 w-full sm:w-auto">
@@ -108,6 +102,7 @@ export default function CategoryPage() {
             </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
@@ -116,13 +111,19 @@ export default function CategoryPage() {
                 <TableRow className="bg-gray-50">
                   <TableHead className="font-semibold">Name</TableHead>
                   <TableHead className="font-semibold">Slug</TableHead>
-                  <TableHead className="text-right font-semibold">Actions</TableHead>
+                  <TableHead className="text-right font-semibold">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <TableRow key={category._id} className="hover:bg-gray-50 transition-colors">
+                    <TableRow
+                      key={category._id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <TableCell>{category.name}</TableCell>
                       <TableCell>{category.slug}</TableCell>
                       <TableCell className="text-right">
@@ -138,7 +139,10 @@ export default function CategoryPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-gray-500 py-6">
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-gray-500 py-6"
+                    >
                       No categories found.
                     </TableCell>
                   </TableRow>
@@ -151,11 +155,18 @@ export default function CategoryPage() {
           <div className="grid gap-4 md:hidden">
             {categories.length > 0 ? (
               categories.map((category) => (
-                <Card key={category._id} className="p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <Card
+                  key={category._id}
+                  className="p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-semibold text-gray-800">{category.name}</h3>
-                      <p className="text-sm text-gray-500">{category.slug}</p>
+                      <h3 className="font-semibold text-gray-800">
+                        {category.name}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {category.slug}
+                      </p>
                     </div>
                     <Button
                       variant="destructive"

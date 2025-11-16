@@ -2,20 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/axiosInstance";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import Image from "next/image";
 import { toast } from "sonner";
-
-const baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 interface Category {
   _id: string;
@@ -38,25 +32,25 @@ export default function AddProductPage() {
     categoryId: "",
   });
 
+  // =======================
+  // Fetch Categories
+  // =======================
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${baseUrl}/category`);
-        const data = await res.json();
-        if (res.ok) {
-          setCategories(data.payload || []);
-        } else {
-          toast.error(data.message || "Failed to load categories");
-        }
+        const res = await axiosInstance.get("/category");
+        setCategories(res.data.payload || []);
       } catch (err) {
         console.error("Failed to load categories", err);
         toast.error("Failed to load categories");
       }
     };
-
     fetchCategories();
   }, []);
 
+  // =======================
+  // Handle Image Preview
+  // =======================
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -65,6 +59,9 @@ export default function AddProductPage() {
     }
   };
 
+  // =======================
+  // Submit Product
+  // =======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -85,7 +82,7 @@ export default function AddProductPage() {
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("description", form.description);
-    formData.append("price", form.price); // price stays as number
+    formData.append("price", form.price);
     formData.append("quantity", form.quantity);
     formData.append("shipping", form.shipping ? "1" : "0");
     formData.append("categoryId", form.categoryId);
@@ -94,24 +91,15 @@ export default function AddProductPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${baseUrl}/product`, {
-        method: "POST",
-        body: formData,
+      await axiosInstance.post("/product", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const result = await res.json();
-
-      console.log("Response:", result.payload);
-
-      if (res.ok) {
-        toast.success("Product created successfully");
-        router.push("/dashboard/products");
-      } else {
-        toast.error(result.message || "Failed to create product");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Something went wrong!");
+      toast.success("Product created successfully");
+      router.push("/dashboard/products");
+    } catch (err) {
+      console.error("Error creating product:", err);
+      toast.error("Failed to create product");
     } finally {
       setLoading(false);
     }
@@ -122,33 +110,29 @@ export default function AddProductPage() {
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Add New Product</CardTitle>
-          <CardDescription>
-            Upload a new product to your store.
-          </CardDescription>
+          <CardDescription>Upload a new product to your store.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Product Name</Label>
               <Input
                 id="name"
                 value={form.name}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, name: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter product name"
                 required
               />
             </div>
 
+            {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <textarea
                 id="description"
                 value={form.description}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, description: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter product description"
                 className="w-full border rounded p-2"
                 rows={4}
@@ -156,6 +140,7 @@ export default function AddProductPage() {
               />
             </div>
 
+            {/* Price */}
             <div className="space-y-2">
               <Label htmlFor="price">Price (৳)</Label>
               <Input
@@ -164,9 +149,7 @@ export default function AddProductPage() {
                 min="0"
                 step="0.01"
                 value={form.price}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, price: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
                 placeholder="Enter price in ৳"
                 required
               />
@@ -177,6 +160,7 @@ export default function AddProductPage() {
               )}
             </div>
 
+            {/* Quantity */}
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantity</Label>
               <Input
@@ -184,28 +168,24 @@ export default function AddProductPage() {
                 type="number"
                 min="0"
                 value={form.quantity}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, quantity: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
                 placeholder="Enter quantity"
                 required
               />
             </div>
 
-            <div className="space-y-2 flex items-center gap-2">
+            {/* Shipping */}
+            <div className="flex items-center gap-2">
               <input
                 id="shipping"
                 type="checkbox"
                 checked={form.shipping}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, shipping: e.target.checked }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, shipping: e.target.checked }))}
               />
-              <Label htmlFor="shipping" className="mb-0 cursor-pointer">
-                Shipping Available
-              </Label>
+              <Label htmlFor="shipping" className="mb-0 cursor-pointer">Shipping Available</Label>
             </div>
 
+            {/* Image */}
             <div className="space-y-2">
               <Label htmlFor="image">Product Image</Label>
               <Input
@@ -226,15 +206,14 @@ export default function AddProductPage() {
               )}
             </div>
 
+            {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <select
                 id="category"
                 className="w-full border px-3 py-2 rounded"
                 value={form.categoryId}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, categoryId: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, categoryId: e.target.value }))}
                 required
               >
                 <option value="">Select category</option>

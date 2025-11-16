@@ -2,17 +2,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { UserType } from "@/types/user";
 
-// Safe function to get user from localStorage
+// 🧠 LocalStorage থেকে user safely পাওয়া
 const getUserFromLocalStorage = (): UserType | null => {
-  // Avoid running during SSR
   if (typeof window === "undefined") return null;
 
   const stored = localStorage.getItem("user");
-
-  // If value doesn't exist or is invalid
-  if (!stored || stored === "undefined" || stored === "null") {
-    return null;
-  }
+  if (!stored || stored === "undefined" || stored === "null") return null;
 
   try {
     return JSON.parse(stored) as UserType;
@@ -34,16 +29,17 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // ✅ login বা register এ user set করা
     setUser: (state, action: PayloadAction<UserType | null>) => {
       state.user = action.payload;
-
-      // Only store if payload is valid
       if (action.payload) {
         localStorage.setItem("user", JSON.stringify(action.payload));
       } else {
         localStorage.removeItem("user");
       }
     },
+
+    // ✅ logout করলে সব clear
     logout: (state) => {
       state.user = null;
       localStorage.removeItem("user");

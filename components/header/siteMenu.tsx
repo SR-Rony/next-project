@@ -1,10 +1,10 @@
 "use client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 import Link from "next/link";
 import { SheetContent } from "../ui/sheet";
 import { useEffect, useState } from "react";
 import { Loader2, List } from "lucide-react";
+import axiosInstance from "@/lib/axiosInstance"; // ✅ import
 
 type CategoryType = {
   _id: string;
@@ -19,9 +19,8 @@ export default function SiteMenu() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${baseUrl}/category`);
-        const data = await res.json();
-        setCategories(data.payload);
+        const res = await axiosInstance.get<{ payload: CategoryType[] }>("/category");
+        setCategories(res.data.payload);
       } catch (error) {
         console.error("Failed to load categories", error);
       } finally {
