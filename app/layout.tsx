@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {isDashboard ? <DashboardNavbar /> : <Header />}
           {children}
           {!isDashboard && <Footer />}
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-center" />
         </Providers>
       </body>
     </html>

@@ -92,7 +92,7 @@ export default function ProductItem({ product }: { product: Product }) {
         </div>
 
         {inStock > 0 ? (
-          <Button onClick={handleAdd} className="mt-4 w-full flex gap-2">
+          <Button onClick={handleAdd} className="mt-4 w-full flex gap-2 cursor-pointer">
             <ShoppingCart className="w-4 h-4" /> Add to Cart
           </Button>
         ) : (
