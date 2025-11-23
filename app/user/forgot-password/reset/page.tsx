@@ -1,0 +1,12 @@
+"use client";
+
+import { Suspense } from "react";
+import ResetPasswordContent from "./ResetPasswordContent";
+
+export default function ResetPasswordWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}

@@ -16,16 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setUser } from "@/app/redux/features/authSlice";
 import { useAppDispatch } from "../../redux/hook/hook";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";   // 👁️ Added icons
 import { toast } from "sonner";
 import axiosInstance from "@/lib/axiosInstance";
 import { AxiosError } from "axios";
 import type { UserType } from "@/types/user";
 
-
-// ========================
-// 🔹 Type Definitions
-// ========================
 interface LoginResponse {
   statusCode: number;
   message: string;
@@ -34,9 +30,6 @@ interface LoginResponse {
   };
 }
 
-// ========================
-// 🔹 Component
-// ========================
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -45,6 +38,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Toggle state
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,9 +52,8 @@ export default function LoginPage() {
         { phone, password },
         { withCredentials: true }
       );
-      const data = res.data;
 
-      console.log("User data:", data);
+      const data = res.data;
 
       if (data.statusCode === 200 && data.payload?.user) {
         toast.success("Login successful!");
@@ -71,7 +65,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
-      console.error("Login error:", error);
       setError(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -100,20 +93,33 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="grid gap-2">
+            {/* ====================== */}
+            {/* 🔥 Password with Eye  */}
+            {/* ====================== */}
+            <div className="grid gap-2 relative">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link href="forgot-password" className="text-sm text-primary hover:underline">
                   Forgot?
                 </Link>
               </div>
+
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+
+              {/* 👁️ Toggle button */}
+              <button
+                type="button"
+                className="absolute right-3 bottom-2 text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             {error && <p className="text-sm text-red-500">{error}</p>}

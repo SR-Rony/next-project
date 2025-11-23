@@ -1,33 +1,40 @@
 "use client";
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import axiosInstance from "@/lib/axiosInstance";
+import { AxiosError } from "axios";
+
+interface ApiErrorResponse {
+  message?: string;
+}
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    if (!/^\d{10,15}$/.test(phone)) {
+      toast.error("Invalid phone number");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${baseUrl}/user/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) {
-        toast.error("Something went wrong.");
-      } else {
-        toast.success("Password reset link sent to your email!");
-      }
+      await axiosInstance.post("/user/forgot-password", { phone });
+      toast.success("OTP sent to your phone number!");
+      router.push(`/user/forgot-password/verify?phone=${phone}`);
     } catch (error) {
-      console.error("Error sending reset link:", error);
-      toast.error("Server error.");
+      const err = error as AxiosError<ApiErrorResponse>;
+      toast.error(err.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }
@@ -37,16 +44,19 @@ export default function ForgotPasswordPage() {
     <div className="max-w-md mx-auto mt-16">
       <h1 className="text-2xl font-bold mb-4">Forgot Password</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+
         <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Enter your phone number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           required
         />
-        <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-          {loading ? <Loader2 className="animate-spin" /> : "Send Reset Link"}
+
+        <Button type="submit" disabled={loading} className="w-full flex justify-center items-center">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send OTP"}
         </Button>
+
       </form>
     </div>
   );

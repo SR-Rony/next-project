@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ShoppingCart, Star, Truck, RefreshCw, ShieldCheck, CreditCard } from "lucide-react";
+import { ShoppingCart} from "lucide-react";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
