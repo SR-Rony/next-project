@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Trash, Plus } from "lucide-react";
+import { Trash, Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import axiosInstance from "@/lib/axiosInstance";
 
@@ -32,7 +32,12 @@ export default function CategoryPage() {
   const [newCategory, setNewCategory] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🟢 Fetch Categories (axios)
+  // 🔵 Edit Modal States
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editSlug, setEditSlug] = useState("");
+
+  // 🟢 Fetch Categories
   const fetchCategories = async () => {
     try {
       const res = await axiosInstance.get("/category");
@@ -47,17 +52,15 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
-  // 🟢 Add New Category
+  // 🟢 Add Category
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return toast.error("Please enter category name");
 
     setLoading(true);
     try {
       await axiosInstance.post("/category", { name: newCategory });
-
       toast.success("Category added successfully!");
       setNewCategory("");
-
       fetchCategories();
     } catch (err) {
       console.error(err);
@@ -73,7 +76,6 @@ export default function CategoryPage() {
 
     try {
       await axiosInstance.delete(`/category/${slug}`);
-
       toast.success("Category deleted");
       fetchCategories();
     } catch (err) {
@@ -82,15 +84,37 @@ export default function CategoryPage() {
     }
   };
 
+  // 🟡 Open Edit Modal
+  const openEditModal = (category: CategoryType) => {
+    setEditSlug(category.slug);
+    setEditName(category.name);
+    setEditModalOpen(true);
+  };
+
+  // 🟢 Update Category API
+  const handleUpdate = async () => {
+    if (!editName.trim()) return toast.error("Category name required");
+
+    try {
+      await axiosInstance.post(`/category/${editSlug}`, { name: editName });
+      toast.success("Category updated!");
+      setEditModalOpen(false);
+      fetchCategories();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update category");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 mt-16">
+      {/* ================= Header & Add ================= */}
       <Card className="shadow-md border border-gray-200">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b">
           <CardTitle className="text-xl font-bold text-gray-800">
             Categories
           </CardTitle>
 
-          {/* Add Category Input */}
           <div className="flex gap-2 w-full sm:w-auto">
             <Input
               placeholder="Enter category name..."
@@ -104,7 +128,7 @@ export default function CategoryPage() {
         </CardHeader>
 
         <CardContent>
-          {/* Desktop Table */}
+          {/* ================= Desktop Table ================= */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
@@ -118,7 +142,7 @@ export default function CategoryPage() {
               </TableHeader>
 
               <TableBody>
-                {categories.length > 0 ? (
+                {categories.length ? (
                   categories.map((category) => (
                     <TableRow
                       key={category._id}
@@ -126,7 +150,18 @@ export default function CategoryPage() {
                     >
                       <TableCell>{category.name}</TableCell>
                       <TableCell>{category.slug}</TableCell>
-                      <TableCell className="text-right">
+
+                      <TableCell className="text-right flex gap-2 justify-end">
+                        {/* 🟡 Edit Button */}
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => openEditModal(category)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+
+                        {/* 🟥 Delete Button */}
                         <Button
                           variant="destructive"
                           size="icon"
@@ -151,30 +186,39 @@ export default function CategoryPage() {
             </Table>
           </div>
 
-          {/* Mobile Card View */}
+          {/* ================= Mobile Cards ================= */}
           <div className="grid gap-4 md:hidden">
-            {categories.length > 0 ? (
+            {categories.length ? (
               categories.map((category) => (
                 <Card
                   key={category._id}
-                  className="p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                  className="p-4 border border-gray-200 shadow-sm"
                 >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-semibold text-gray-800">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-gray-500">
-                        {category.slug}
-                      </p>
+                      <p className="text-sm text-gray-500">{category.slug}</p>
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(category.slug)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => openEditModal(category)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(category.slug)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))
@@ -184,6 +228,30 @@ export default function CategoryPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ===================== Edit Modal ===================== */}
+      {editModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Edit Category</h2>
+
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setEditModalOpen(false)}>
+                Cancel
+              </Button>
+
+              <Button onClick={handleUpdate}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

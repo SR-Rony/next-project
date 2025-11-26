@@ -32,6 +32,7 @@ export default function Header() {
   // FIXED — user state
   const user: UserType | null = useAppSelector((state) => state.user.user);
   
+  
   const userName = user?.name?.slice(0, 2).toUpperCase() || "GU";
 
   const menuItems = [
@@ -69,7 +70,7 @@ export default function Header() {
             </Link>
           </DropdownMenuItem>
 
-          {user?.role && (
+          {user?.role == "admin" && (
             <DropdownMenuItem>
               <Link href="/dashboard" className="w-full">
                 Dashboard
