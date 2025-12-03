@@ -16,7 +16,7 @@ type ProductType = {
   image: string;
 };
 
-// Type-safe debounce for string argument
+// Debounce function only for string input
 function debounceString(func: (arg: string) => void, delay: number) {
   let timer: ReturnType<typeof setTimeout>;
   return (arg: string) => {
@@ -26,13 +26,14 @@ function debounceString(func: (arg: string) => void, delay: number) {
 }
 
 export default function SearchBar() {
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch search API call
+
+  // Fetch Search Result
   const fetchSearch = useCallback(async (searchText: string) => {
     try {
       if (!searchText.trim()) {
@@ -60,25 +61,11 @@ export default function SearchBar() {
     debouncedSearch(value);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!results.length) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % results.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((prev) => (prev - 1 + results.length) % results.length);
-    } else if (e.key === "Enter") {
-      if (activeIndex >= 0 && activeIndex < results.length) {
-        window.location.href = `/product/${results[activeIndex].slug}`;
-      }
-    }
-  };
 
-  // Close dropdown on outside click
+  // Click outside close dropdown
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setResults([]);
       }
     };
@@ -90,13 +77,14 @@ export default function SearchBar() {
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto flex flex-col gap-2 px-2 sm:px-0">
       <div className="flex w-full shadow-md rounded-lg overflow-hidden border border-gray-700">
         <Input
-          placeholder="Search products..."
+          placeholder="পণ্য সার্চ করুন..."
           className="flex-1 rounded-none bg-gray-900 text-white placeholder:text-gray-400 border-none focus:ring-2 focus:ring-primary transition"
           value={query}
           onChange={handleChange}
-          onKeyDown={handleKeyDown}
         />
-        <Button className="bg-primary text-black rounded-none px-4 hover:bg-primary/90 transition">
+        <Button
+          className="bg-primary text-black rounded-none px-4 hover:bg-primary/90 transition"
+        >
           <Search className="w-5 h-5" />
         </Button>
       </div>
@@ -109,7 +97,7 @@ export default function SearchBar() {
         )}
       >
         {loading ? (
-          <p className="px-4 py-2 text-gray-400">Searching...</p>
+          <p className="px-4 py-2 text-gray-400">সার্চ হচ্ছে...</p>
         ) : results.length > 0 ? (
           results.map((product, index) => (
             <Link
@@ -132,7 +120,7 @@ export default function SearchBar() {
             </Link>
           ))
         ) : query.trim() ? (
-          <p className="px-4 py-2 text-gray-400">No products found</p>
+          <p className="px-4 py-2 text-gray-400">কোনো পণ্য পাওয়া যায়নি</p>
         ) : null}
       </div>
     </div>
