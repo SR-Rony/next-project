@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,19 +56,19 @@ export default function CustomersPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   // 🟢 Fetch All Customers (axios + cookie)
-  const fetchCustomers = async () => {
-    try {
-      const res = await axiosInstance.get(`/user?search=${search}`);
-      setCustomers(res.data?.payload?.allUser || []);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-      toast.error("Failed to fetch customers");
-    }
-  };
+  const fetchCustomers = useCallback(async () => {
+  try {
+    const res = await axiosInstance.get(`/user?search=${search}`);
+    setCustomers(res.data?.payload?.allUser || []);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    toast.error("Failed to fetch customers");
+  }
+}, [search]);
 
   useEffect(() => {
-    fetchCustomers();
-  }, [search]);
+  fetchCustomers();
+}, [fetchCustomers]);
 
   // 🟢 Delete Customer
   const handleDelete = async (id: string) => {

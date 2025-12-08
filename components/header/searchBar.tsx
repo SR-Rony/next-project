@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, ChangeEvent, KeyboardEvent } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import axiosInstance from "@/lib/axiosInstance";
 import Link from "next/link";
+import Image from "next/image";
 import clsx from "clsx";
 
 type ProductType = {
@@ -16,7 +17,7 @@ type ProductType = {
   image: string;
 };
 
-// Debounce function only for string input
+// Debounce helper
 function debounceString(func: (arg: string) => void, delay: number) {
   let timer: ReturnType<typeof setTimeout>;
   return (arg: string) => {
@@ -30,37 +31,39 @@ export default function SearchBar() {
   const [results, setResults] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Create debounced function with useRef (BEST PRACTICE)
+  const fetchSearchRef = useRef(
+    debounceString(async (searchText: string) => {
+      try {
+        if (!searchText.trim()) {
+          setResults([]);
+          return;
+        }
+        setLoading(true);
 
-  // Fetch Search Result
-  const fetchSearch = useCallback(async (searchText: string) => {
-    try {
-      if (!searchText.trim()) {
-        setResults([]);
-        return;
+        const res = await axiosInstance.get(`/product/search`, {
+          params: { query: searchText },
+        });
+
+        setResults(res.data.products || []);
+      } catch (err) {
+        console.error("Search Error:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(true);
-      const res = await axiosInstance.get(`/product/search`, {
-        params: { query: searchText },
-      });
-      setResults(res.data.products || []);
-    } catch (err) {
-      console.error("Search Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    }, 500)
+  );
 
-  const debouncedSearch = useCallback(debounceString(fetchSearch, 500), [fetchSearch]);
-
+  // Input change handler
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
     setActiveIndex(-1);
-    debouncedSearch(value);
+    fetchSearchRef.current(value);
   };
-
 
   // Click outside close dropdown
   useEffect(() => {
@@ -75,6 +78,8 @@ export default function SearchBar() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto flex flex-col gap-2 px-2 sm:px-0">
+
+      {/* Search Input */}
       <div className="flex w-full shadow-md rounded-lg overflow-hidden border border-gray-700">
         <Input
           placeholder="Product search ..."
@@ -82,9 +87,7 @@ export default function SearchBar() {
           value={query}
           onChange={handleChange}
         />
-        <Button
-          className="bg-primary text-black rounded-none px-4 hover:bg-primary/90 transition"
-        >
+        <Button className="bg-primary text-black rounded-none px-4 hover:bg-primary/90 transition">
           <Search className="w-5 h-5" />
         </Button>
       </div>
@@ -108,11 +111,14 @@ export default function SearchBar() {
                 index === activeIndex ? "bg-gray-800 scale-105" : "hover:bg-gray-800"
               )}
             >
-              <img
+              <Image
                 src={product.image}
                 alt={product.name}
-                className="w-10 h-10 object-cover rounded mr-4 flex-shrink-0"
+                width={40}
+                height={40}
+                className="rounded mr-4"
               />
+
               <div className="flex-1">
                 <p className="truncate">{product.name}</p>
                 <p className="text-sm text-gray-400">${product.price.toFixed(2)}</p>
