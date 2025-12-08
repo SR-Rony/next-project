@@ -77,7 +77,7 @@ export default function SearchBar() {
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto flex flex-col gap-2 px-2 sm:px-0">
       <div className="flex w-full shadow-md rounded-lg overflow-hidden border border-gray-700">
         <Input
-          placeholder="পণ্য সার্চ করুন..."
+          placeholder="Product search ..."
           className="flex-1 rounded-none bg-gray-900 text-white placeholder:text-gray-400 border-none focus:ring-2 focus:ring-primary transition"
           value={query}
           onChange={handleChange}
@@ -97,7 +97,7 @@ export default function SearchBar() {
         )}
       >
         {loading ? (
-          <p className="px-4 py-2 text-gray-400">সার্চ হচ্ছে...</p>
+          <p className="px-4 py-2 text-gray-400">Products search...</p>
         ) : results.length > 0 ? (
           results.map((product, index) => (
             <Link
@@ -120,7 +120,7 @@ export default function SearchBar() {
             </Link>
           ))
         ) : query.trim() ? (
-          <p className="px-4 py-2 text-gray-400">কোনো পণ্য পাওয়া যায়নি</p>
+          <p className="px-4 py-2 text-gray-400">Product not found</p>
         ) : null}
       </div>
     </div>

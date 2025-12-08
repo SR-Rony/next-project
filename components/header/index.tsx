@@ -57,6 +57,7 @@ export default function Header() {
         {/* <User className="w-6 h-6" /> */}
         Login
       </Link>
+      <span>/</span>
       <Link href="/user/register" className="p-2 rounded-md hover:bg-white/10">
         {/* <User className="w-6 h-6" /> */}
         Sing Up
