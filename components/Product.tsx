@@ -28,7 +28,8 @@ export default function Product() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axiosInstance.get<ProductResponse>("/product");
+        const res = await axiosInstance.get<ProductResponse>("/product"); 
+        
         setProducts(res.data.payload.products);
       } catch (err) {
         console.error("Failed to load products:", err);
