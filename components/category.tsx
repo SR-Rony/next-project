@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import watch from "@/public/category/watch.jpeg"
+import watch from "@/public/category/watch.jpg"
 import axiosInstance from "@/lib/axiosInstance"
 
 type Category = {
@@ -18,6 +18,8 @@ export default function Category() {
     const fetchCategories = async () => {
       try {
         const res = await axiosInstance.get<{ payload: Category[] }>("/category")
+        console.log('category respons',res);
+        
         setCategories(res.data.payload)
       } catch (error) {
         console.error("Failed to load categories", error)

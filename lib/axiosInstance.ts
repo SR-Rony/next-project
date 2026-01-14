@@ -2,6 +2,9 @@ import axios from "axios";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+console.log('main api',apiUrl);
+
+
 const axiosInstance = axios.create({
   baseURL: apiUrl,
   withCredentials: true, // ✅ Cookie পাঠানোর জন্য (যদি server cookie set করে)
