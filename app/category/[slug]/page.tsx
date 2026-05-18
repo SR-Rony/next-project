@@ -11,6 +11,7 @@ import axiosInstance from "@/lib/axiosInstance"; // ✅ use axiosInstance
 type ProductType = {
   _id: string;
   name: string;
+  slug: string;
   price: number;
   image: string;
 };
@@ -71,7 +72,7 @@ export default function CategoryPage() {
                       {product.name}
                     </h3>
                     <p className="text-gray-600">৳{product.price}</p>
-                    <Link href={`/product/${product._id}`} className="w-full">
+                    <Link href={`/product/${product.slug}`} className="w-full">
                       <Button className="w-full mt-3">View Details</Button>
                     </Link>
                   </CardContent>
