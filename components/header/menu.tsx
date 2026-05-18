@@ -9,6 +9,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 type CategoryType = {
   _id: string;
   name: string;
+  slug: string;
 };
 
 const mobileMenuItems = [
@@ -31,7 +32,7 @@ export default function MobileBottomMenu() {
         const res = await fetch(`${baseUrl}/category`);
         if (!res.ok) throw new Error("Failed to fetch categories");
         const data = await res.json();
-        setCategories(data.payload);
+        setCategories(Array.isArray(data.payload) ? data.payload : []);
       } catch (err) {
         console.error("Error fetching categories:", err);
       } finally {
@@ -104,7 +105,7 @@ export default function MobileBottomMenu() {
                 {categories.map((cat) => (
                   <li key={cat._id}>
                     <Link
-                      href={`/category/${cat.name.toLowerCase()}`}
+                      href={`/category/${cat.slug}`}
                       className="flex items-center justify-between px-4 py-2 bg-gray-100 text-gray-800 rounded-lg shadow-sm hover:bg-primary hover:text-white transition"
                       onClick={() => setSidebarOpen(false)}
                     >
