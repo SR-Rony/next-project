@@ -52,7 +52,7 @@ export default function ProductItem({ product }: Props) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-xl">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-100/90 bg-white shadow-sm ring-1 ring-black/[0.04] transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-primary/20">
       
       {/* 🔖 Badges */}
       <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
@@ -78,7 +78,7 @@ export default function ProductItem({ product }: Props) {
             fill
             sizes="(max-width: 768px) 100vw, 25vw"
             priority={false}
-            className="object-cover transition duration-500 group-hover:scale-110"
+            className="object-cover transition duration-500 ease-out group-hover:scale-[1.04]"
           />
 
           {/* Gradient overlay on hover */}
@@ -89,7 +89,7 @@ export default function ProductItem({ product }: Props) {
       {/* 📦 Content */}
       <div className="p-4">
         <Link href={`/product/${product.slug}`}>
-          <h3 className="line-clamp-1 text-base font-semibold text-brand-charcoal hover:underline">
+          <h3 className="line-clamp-1 text-base font-semibold text-slate-900 transition group-hover:text-slate-800 dark:text-slate-100">
             {product.name}
           </h3>
         </Link>
@@ -102,7 +102,7 @@ export default function ProductItem({ product }: Props) {
 
         {/* 💰 Price */}
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-lg font-bold text-brand-teal">
+          <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
             ৳{product.price.toLocaleString("en-BD")}
           </span>
 
@@ -117,7 +117,7 @@ export default function ProductItem({ product }: Props) {
         <Button
           onClick={handleAddToCart}
           disabled={!inStock}
-          className="mt-4 w-full gap-2"
+          className="mt-4 h-11 w-full gap-2 rounded-xl font-semibold"
         >
           <ShoppingCart className="h-4 w-4" />
           {inStock ? "Add to Cart" : "Out of Stock"}
